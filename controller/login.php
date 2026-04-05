@@ -1,0 +1,50 @@
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
+    require_once "../conn/conn.php";
+    require_once "../model/dbs.php";
+
+    $connection = new Dbs($host, $user, $pass, $db);
+    include "../model/m_proses.php";
+    $result = [];
+    $data = new Proses_sql($connection);
+    @$param = $_POST["param"];
+    @$username = $_POST["username"];
+    @$password = md5($_POST["password"]);
+
+    if (@$username == "" || @$password == "") {
+        $response["value"] = "0";
+        $response["message"] = "LOGIN FAILED ";
+    } else {
+        @$user = $data->login($username, $password);
+        @$data_user = $user->fetch_object();
+        if (isset($data_user)) {
+            $id_users = $data_user->id_users;
+            $username = $data_user->username;
+            $password = $data_user->password;
+            $nama_user = $data_user->nama_user;
+            $foto = $data_user->foto;
+            $id_tu = $data_user->id_tu;
+            $no_telp = $data_user->no_telp;
+            $token = $data_user->token;
+            $level = $data_user->level;
+            $status = $data_user->status;
+
+            $response["value"] = "1";
+            $response["message"] = "LOGIN SUCCESS";
+            $response["id_users"] = strval($id_users);
+            $response["username"] = $username;
+            $response["password"] = $password;
+            $response["foto"] = $foto;
+            $response["id_tu"] = $id_tu;
+            $response["no_telp"] = $no_telp;
+            $response["token"] = $token;
+            $response["level"] = $level;
+            $response["status"] = $status;
+        } else {
+            $response["value"] = "0";
+            $response["message"] = "LOGIN FAILED";
+        }
+    }
+    echo json_encode($response);
+}
+?>
