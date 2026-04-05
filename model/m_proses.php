@@ -168,6 +168,154 @@ class Proses_sql extends DbTable
         return $query;
     }
 
+    // ------------- TABEL FORM ----------------------------
+
+    public function data_form(
+        $id_from = null,
+        $form_no = null,
+        $form_serv_name = null,
+        $form_check_by = null,
+        $form_date_serv_name = null,
+        $form_serv_comment = null,
+        $form_superior_aprd = null,
+        $form_superior_comment = null,
+        $form_sadmin_comment = null,
+        $form_shead_aprd = null,
+        $form_shead_comment = null,
+        $form_date_check_by = null,
+        $from_date_update = null,
+        $form_user_update = null,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_form;
+        $select = $this->sql_select;
+        $sql = $select;
+        $sql .= $table;
+        if (@$id_from != null || @$id_from != "") {
+            $sql .= " WHERE id_from = '$id_from' ";
+        } elseif (@$form_no != null || @$form_no != "") {
+            $sql .= " WHERE form_no = '$form_no' ";
+        } elseif (@$form_serv_name != null || @$form_serv_name != "") {
+            $sql .= " WHERE form_serv_name = '$form_serv_name' ";
+        } else {
+            $sql .= " ORDER BY form_no ASC";
+        }
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function add_form(
+        $id_from = null,
+        $form_no = null,
+        $form_serv_name = null,
+        $form_check_by = null,
+        $form_date_serv_name = null,
+        $form_serv_comment = null,
+        $form_superior_aprd = null,
+        $form_superior_comment = null,
+        $form_sadmin_comment = null,
+        $form_shead_aprd = null,
+        $form_shead_comment = null,
+        $form_date_check_by = null,
+        $from_date_update = null,
+        $form_user_update = null,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_form;
+        $insert = $this->sql_insert;
+        $sql = $insert;
+        $sql .= $table;
+        $sql .= " SET 
+            id_from = '$id_from',
+            form_no = '$form_no',
+            form_serv_name = '$form_serv_name',
+            form_check_by = '$form_check_by',
+            form_date_serv_name = '$form_date_serv_name',
+            form_serv_comment = '$form_serv_comment',
+            form_superior_aprd = '$form_superior_aprd',
+            form_superior_comment = '$form_superior_comment',
+            form_sadmin_comment = '$form_sadmin_comment',
+            form_shead_aprd = '$form_shead_aprd',
+            form_shead_comment = '$form_shead_comment',
+            form_date_check_by = '$form_date_check_by',
+            from_date_update = '$from_date_update',
+            form_user_update = '$form_user_update'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function edit_form(
+        $id_from = null,
+        $form_no = null,
+        $form_serv_name = null,
+        $form_check_by = null,
+        $form_date_serv_name = null,
+        $form_serv_comment = null,
+        $form_superior_aprd = null,
+        $form_superior_comment = null,
+        $form_sadmin_comment = null,
+        $form_shead_aprd = null,
+        $form_shead_comment = null,
+        $form_date_check_by = null,
+        $from_date_update = null,
+        $form_user_update = null,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_form;
+        $update = $this->sql_update;
+        $sql = $update;
+        $sql .= $table;
+        $sql .= " SET 
+            form_no = '$form_no',
+            form_serv_name = '$form_serv_name',
+            form_check_by = '$form_check_by',
+            form_date_serv_name = '$form_date_serv_name',
+            form_serv_comment = '$form_serv_comment',
+            form_superior_aprd = '$form_superior_aprd',
+            form_superior_comment = '$form_superior_comment',
+            form_sadmin_comment = '$form_sadmin_comment',
+            form_shead_aprd = '$form_shead_aprd',
+            form_shead_comment = '$form_shead_comment',
+            form_date_check_by = '$form_date_check_by',
+            from_date_update = '$from_date_update',
+            form_user_update = '$form_user_update'
+            WHERE id_from = '$id_from'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function delete_form(
+        $id_from = null,
+        $form_no = null,
+        $form_serv_name = null,
+        $form_check_by = null,
+        $form_date_serv_name = null,
+        $form_serv_comment = null,
+        $form_superior_aprd = null,
+        $form_superior_comment = null,
+        $form_sadmin_comment = null,
+        $form_shead_aprd = null,
+        $form_shead_comment = null,
+        $form_date_check_by = null,
+        $from_date_update = null,
+        $form_user_update = null,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_form;
+        $delete = $this->sql_delete;
+        $sql = $delete;
+        $sql .= $table;
+        $sql .= " WHERE id_from = '$id_from'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
     function __destruct()
     {
         $db = $this->mysqli->conn;

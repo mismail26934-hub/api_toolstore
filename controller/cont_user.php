@@ -56,7 +56,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$username = $row_user->username;
                     @$password = $row_user->password;
                     @$nama_user = $row_user->nama_user;
-                    @$nama_user = $row_user->nama_user;
                     @$foto = $row_user->foto;
                     @$id_tu = $row_user->id_tu;
                     @$no_telp = $row_user->no_telp;
