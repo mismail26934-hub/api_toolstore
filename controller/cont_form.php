@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     @$form_no = $_POST["form_no"];
     @$form_serv_name = $_POST["form_serv_name"];
     @$form_check_by = $_POST["form_check_by"];
-    @$form_date_serv_name = md5(@$form_date_serv_name);
+    @$form_date_serv_name = $_POST["form_date_serv_name"];
     @$form_serv_comment = $_POST["form_serv_comment"];
     @$form_superior_aprd = $_POST["form_superior_aprd"];
     @$form_superior_comment = $_POST["form_superior_comment"];
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             @$id_from_cek = $row_form_cek->id_from;
             @$form_no_cek = $row_form_cek->form_no;
             @$form_serv_name_cek = $row_form_cek->form_serv_name;
-        } elseif (@$param == @$view_data_user) {
+        } elseif (@$param == @$view_data_form) {
             while (@$row_form = $data_form->fetch_object()) {
                 if (isset($row_form)) {
                     @$id_from = $row_form->id_from;
@@ -138,9 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
         case $edit_data_form:
             if (@$id_from != @$id_from_cek && $form_no == $form_no_cek) {
                 $response["value"] = "0";
-                $response[
-                    "message"
-                ] = "NOMOR FORM DUPLICATE $id_from $id_from_cek  $form_no $form_no_cek!";
+                $response["message"] = "FORM NUMBER DUPLICATE !";
             } elseif (@$id_from == null || @$id_from == "") {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
