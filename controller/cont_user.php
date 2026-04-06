@@ -124,14 +124,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $username == $username_cek
             ) {
                 $response["value"] = "0";
-                $response[
-                    "message"
-                ] = "USERNAME DUPLICATE $username $username_cek $id_user_post  $id_users_cek !";
+                $response["message"] = "USERNAME DUPLICATE !";
             } elseif (@$id_users == null || @$id_users == "") {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
             } else {
-                $edit_user = 1;
                 @$edit_user = $data->edit_user(
                     @$id_users,
                     @$username,
@@ -146,9 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 );
                 if ($edit_user) {
                     $response["value"] = "1";
-                    $response[
-                        "message"
-                    ] = "$param $username $username_cek $id_user_post  $id_users_cek SUCCESS";
+                    $response["message"] = "$param SUCCESS";
                 } else {
                     $response["value"] = "0";
                     $response["message"] = "$param FAILED";

@@ -34,7 +34,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
         @$param == @$view_data_form
     ) {
         @$data_form = $data->data_form(
-            @$id_from,
+            @$param == @$add_data_form || @$param == @$edit_data_form
+                ? ""
+                : @$id_from,
             @$form_no,
             @$form_serv_name,
             "",
@@ -102,4 +104,104 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             }
         }
     }
+
+    switch ($param) {
+        case $add_data_form:
+            if (isset($row_form_cek)) {
+                $response["value"] = "0";
+                $response["message"] = "FORM NUMBER DUPLICATE";
+            } else {
+                @$add_form = $data->add_form(
+                    @$id_from,
+                    @$form_no,
+                    @$form_serv_name,
+                    @$form_check_by,
+                    @$form_date_serv_name,
+                    @$form_superior_aprd,
+                    @$form_superior_comment,
+                    @$form_sadmin_comment,
+                    @$form_shead_aprd,
+                    @$form_shead_comment,
+                    @$form_date_check_by,
+                    @$from_date_update,
+                    @$form_user_update,
+                );
+                if ($add_form) {
+                    $response["value"] = "1";
+                    $response["message"] = "$param SUCCESS";
+                } else {
+                    $response["value"] = "0";
+                    $response["message"] = "$param  FAILED";
+                }
+            }
+            break;
+        case $edit_data_form:
+            if (@$id_from != @$id_from_cek && $form_no == $form_no_cek) {
+                $response["value"] = "0";
+                $response[
+                    "message"
+                ] = "NOMOR FORM DUPLICATE $id_from $id_from_cek  $form_no $form_no_cek!";
+            } elseif (@$id_from == null || @$id_from == "") {
+                $response["value"] = "0";
+                $response["message"] = "ERROR $param !";
+            } else {
+                @$edit_form = $data->edit_form(
+                    @$id_from,
+                    @$form_no,
+                    @$form_serv_name,
+                    @$form_check_by,
+                    @$form_date_serv_name,
+                    @$form_superior_aprd,
+                    @$form_superior_comment,
+                    @$form_sadmin_comment,
+                    @$form_shead_aprd,
+                    @$form_shead_comment,
+                    @$form_date_check_by,
+                    @$from_date_update,
+                    @$form_user_update,
+                );
+                if ($edit_form) {
+                    $response["value"] = "1";
+                    $response["message"] = "$param SUCCESS";
+                } else {
+                    $response["value"] = "0";
+                    $response["message"] = "$param FAILED";
+                }
+            }
+            break;
+        case @$delete_data_form:
+            if (@$id_from == null || @$id_from == "") {
+                $response["value"] = "0";
+                $response["message"] = "ERROR $param !";
+            } else {
+                @$delete_form = $data->delete_form(@$id_from);
+            }
+            if (@$delete_form) {
+                $response["value"] = "1";
+                $response["message"] = "$param SUCCESS";
+            } else {
+                $response["value"] = "0";
+                $response["message"] = "$param FAILED";
+            }
+            break;
+        default:
+            $response["value"] = "2";
+            $response["message"] = "$param DATA FAILED";
+            break;
+    }
+
+    switch ($param) {
+        case $add_data_form:
+            array_push($result, $response);
+            break;
+        case $edit_data_form:
+            array_push($result, $response);
+            break;
+        case $delete_data_form:
+            array_push($result, $response);
+            break;
+        default:
+            break;
+    }
+    echo json_encode($result);
 } ?> 
