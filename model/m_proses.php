@@ -316,6 +316,128 @@ class Proses_sql extends DbTable
         return $query;
     }
 
+    // ------------- TABEL FORM DETAIL ----------------------
+
+    public function data_form_detail(
+        $id_form_detail = null,
+        $id_form = null,
+        $form_comment = null,
+        $pn_group = null,
+        $pn_desc = null,
+        $qty = null,
+        $explan = null,
+        $action_note = null,
+        $form_detail_date = null,
+        $form_detail_user = null,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_form_detail;
+        $select = $this->sql_select;
+        $sql = $select;
+        $sql .= $table;
+        if (@$id_form_detail != null || @$id_form_detail != "") {
+            $sql .= " WHERE id_form_detail = '$id_form_detail' ";
+        } elseif (@$id_form != null || @$id_form != "") {
+            $sql .= " WHERE id_form = '$id_form' ";
+        } else {
+            $sql .= " ORDER BY id_form ASC";
+        }
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function add_form_detail(
+        $id_form_detail = null,
+        $id_form = null,
+        $form_comment = null,
+        $pn_group = null,
+        $pn_desc = null,
+        $qty = null,
+        $explan = null,
+        $action_note = null,
+        $form_detail_date = null,
+        $form_detail_user = null,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_form_detail;
+        $insert = $this->sql_insert;
+        $sql = $insert;
+        $sql .= $table;
+        $sql .= " SET 
+            id_form_detail = '$id_form_detail',
+            id_form = '$id_form',
+            form_comment = '$form_comment',
+            pn_group = '$pn_group',
+            pn_desc = '$pn_desc',
+            qty = '$qty',
+            explan = '$explan',
+            action_note = '$action_note',
+            form_detail_date = '$form_detail_date',
+            form_detail_user = '$form_detail_user',
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function edit_form_form(
+        $id_form_detail = null,
+        $id_form = null,
+        $form_comment = null,
+        $pn_group = null,
+        $pn_desc = null,
+        $qty = null,
+        $explan = null,
+        $action_note = null,
+        $form_detail_date = null,
+        $form_detail_user = null,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_form_detail;
+        $update = $this->sql_update;
+        $sql = $update;
+        $sql .= $table;
+        $sql .= " SET 
+            id_form = '$id_form',
+            form_comment = '$form_comment',
+            pn_group = '$pn_group',
+            pn_desc = '$pn_desc',
+            qty = '$qty',
+            explan = '$explan',
+            action_note = '$action_note',
+            form_detail_date = '$form_detail_date',
+            form_detail_user = '$form_detail_user',
+            WHERE id_form_detail = '$id_form_detail'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function delete_form_detail(
+        $id_form_detail = null,
+        $id_form = null,
+        $form_comment = null,
+        $pn_group = null,
+        $pn_desc = null,
+        $qty = null,
+        $explan = null,
+        $action_note = null,
+        $form_detail_date = null,
+        $form_detail_user = null,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_form_detail;
+        $delete = $this->sql_delete;
+        $sql = $delete;
+        $sql .= $table;
+        $sql .= " WHERE id_form_detail = '$id_form_detail'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
     function __destruct()
     {
         $db = $this->mysqli->conn;
