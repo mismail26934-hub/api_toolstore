@@ -7,12 +7,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     include "../model/m_proses.php";
     $result = [];
     $data = new Proses_sql($connection);
-
+    // ----------------------------------------------
+    //STATUS :
+    // 1.REQUEST SUPERIOR APPROVAL
+    // 2.CHECK BY TOOL STORE
+    // 3.REVIEW SERVICE ADMIN
+    // 4.WAIT APPROVAL SERVICE DEPT. HEAD
+    // 5.WAIT ORDER BY COUNTER
+    // 6.WAIT ORDER BY GA
+    // 7.ORDER DONE
+    // 8.RECEIVED WH/GA
+    // 9.RECEIVED TOOL STORE
+    // 10.COMPLETED
+    // ----------------------------------------------
     @$param = $_POST["param"];
     @$id_from = $_POST["id_from"];
     @$form_no = $_POST["form_no"];
     @$form_serv_name = $_POST["form_serv_name"];
     @$form_check_by = $_POST["form_check_by"];
+    @$form_date_check_by = $_POST["form_date_check_by"];
     @$form_date_serv_name = $_POST["form_date_serv_name"];
     @$form_serv_comment = $_POST["form_serv_comment"];
     @$form_superior_aprd = $_POST["form_superior_aprd"];
@@ -20,9 +33,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     @$form_sadmin_comment = $_POST["form_sadmin_comment"];
     @$form_shead_aprd = $_POST["form_shead_aprd"];
     @$form_shead_comment = $_POST["form_shead_comment"];
-    @$form_date_check_by = $_POST["form_date_check_by"];
     @$from_date_update = $_POST["from_date_update"];
     @$form_user_update = $_POST["form_user_update"];
+    @$form_date_superior_aprd = $_POST["form_date_superior_aprd"];
+    @$form_date_sadmin_comment = $_POST["form_date_sadmin_comment"];
+    @$form_date_shead_aprd = $_POST["form_date_shead_aprd"];
+    @$form_milestone = $_POST["form_milestone"];
+    @$form_status_order = $_POST["form_status_order"];
+
     @$add_data_form = "ADD DATA FORM";
     @$edit_data_form = "EDIT DATA FORM";
     @$view_data_form = "VIEW DATA FORM";
@@ -39,6 +57,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 : @$id_from,
             @$form_no,
             @$form_serv_name,
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
             "",
             "",
             "",
@@ -69,6 +96,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$form_date_check_by = $row_form->form_date_check_by;
                     @$from_date_update = $row_form->from_date_update;
                     @$form_user_update = $row_form->form_user_update;
+                    @$form_milestone = $row_form->form_milestone;
+                    @$form_status_order = $row_form->form_status_order;
                 } else {
                     @$id_from = "";
                     @$form_no = "";
@@ -84,6 +113,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$form_date_check_by = "";
                     @$from_date_update = "";
                     @$form_user_update = "";
+                    @$form_date_superior_aprd = "";
+                    @$form_date_sadmin_comment = "";
+                    @$form_date_shead_aprd = "";
+                    @$form_milestone = "";
+                    @$form_status_order = "";
                 }
                 $b["id_from"] = $id_from;
                 $b["form_no"] = $form_no;
@@ -99,6 +133,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $b["form_date_check_by"] = $form_date_check_by;
                 $b["from_date_update"] = $from_date_update;
                 $b["form_user_update"] = $form_user_update;
+                $b["form_date_superior_aprd"] = $form_date_superior_aprd;
+                $b["form_date_sadmin_comment"] = $form_date_sadmin_comment;
+                $b["form_date_shead_aprd"] = $form_date_shead_aprd;
+                $b["form_milestone"] = $form_milestone;
+                $b["form_status_order"] = $form_status_order;
 
                 array_push($result, $b);
             }
@@ -115,14 +154,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$id_from,
                     @$form_no,
                     @$form_serv_name,
-                    @$form_check_by,
+                    @$form_serv_comment,
                     @$form_date_serv_name,
+                    @$form_check_by,
+                    @$form_date_check_by,
                     @$form_superior_aprd,
                     @$form_superior_comment,
+                    @$form_date_superior_aprd,
                     @$form_sadmin_comment,
+                    @$form_date_sadmin_comment,
                     @$form_shead_aprd,
                     @$form_shead_comment,
-                    @$form_date_check_by,
+                    @$form_milestone,
+                    @$form_status_order,
+                    @$form_date_shead_aprd,
                     @$from_date_update,
                     @$form_user_update,
                 );
@@ -147,14 +192,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$id_from,
                     @$form_no,
                     @$form_serv_name,
-                    @$form_check_by,
+                    @$form_serv_comment,
                     @$form_date_serv_name,
+                    @$form_check_by,
+                    @$form_date_check_by,
                     @$form_superior_aprd,
                     @$form_superior_comment,
+                    @$form_date_superior_aprd,
                     @$form_sadmin_comment,
+                    @$form_date_sadmin_comment,
                     @$form_shead_aprd,
                     @$form_shead_comment,
-                    @$form_date_check_by,
+                    @$form_milestone,
+                    @$form_status_order,
+                    @$form_date_shead_aprd,
                     @$from_date_update,
                     @$form_user_update,
                 );
@@ -172,7 +223,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
             } else {
-                @$delete_form = $data->delete_form(@$id_from);
+                @$delete_form = $data->delete_form(
+                    @$id_from,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                );
             }
             if (@$delete_form) {
                 $response["value"] = "1";

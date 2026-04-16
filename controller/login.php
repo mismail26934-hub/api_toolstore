@@ -34,6 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             $response["id_users"] = strval($id_users);
             $response["username"] = $username;
             $response["password"] = $password;
+            $response["nama_user"] = $nama_user;
             $response["foto"] = $foto;
             $response["id_tu"] = $id_tu;
             $response["no_telp"] = $no_telp;

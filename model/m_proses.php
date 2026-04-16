@@ -47,16 +47,16 @@ class Proses_sql extends DbTable
     // ------------- TABEL USER ----------------------------
 
     public function data_user(
-        $id_users = null,
-        $username = null,
-        $password = null,
-        $nama_user = null,
-        $foto = null,
-        $id_tu = null,
-        $no_telp = null,
-        $token = null,
-        $level = null,
-        $status = null,
+        $id_users,
+        $username,
+        $password,
+        $nama_user,
+        $foto,
+        $id_tu,
+        $no_telp,
+        $token,
+        $level,
+        $status,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
@@ -77,16 +77,16 @@ class Proses_sql extends DbTable
     }
 
     public function add_user(
-        $id_users = "",
-        $username = null,
-        $password = null,
-        $nama_user = null,
-        $foto = null,
-        $id_tu = null,
-        $no_telp = null,
-        $token = null,
-        $level = null,
-        $status = null,
+        $id_users,
+        $username,
+        $password,
+        $nama_user,
+        $foto,
+        $id_tu,
+        $no_telp,
+        $token,
+        $level,
+        $status,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
@@ -111,16 +111,16 @@ class Proses_sql extends DbTable
     }
 
     public function edit_user(
-        $id_users = null,
-        $username = null,
-        $password = null,
-        $nama_user = null,
-        $foto = null,
-        $id_tu = null,
-        $no_telp = null,
-        $token = null,
-        $level = null,
-        $status = null,
+        $id_users,
+        $username,
+        $password,
+        $nama_user,
+        $foto,
+        $id_tu,
+        $no_telp,
+        $token,
+        $level,
+        $status,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
@@ -145,16 +145,16 @@ class Proses_sql extends DbTable
     }
 
     public function delete_user(
-        $id_users = null,
-        $username = null,
-        $password = null,
-        $nama_user = null,
-        $foto = null,
-        $id_tu = null,
-        $no_telp = null,
-        $token = null,
-        $level = null,
-        $status = null,
+        $id_users,
+        $username,
+        $password,
+        $nama_user,
+        $foto,
+        $id_tu,
+        $no_telp,
+        $token,
+        $level,
+        $status,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
@@ -171,20 +171,25 @@ class Proses_sql extends DbTable
     // ------------- TABEL FORM ----------------------------
 
     public function data_form(
-        $id_from = null,
-        $form_no = null,
-        $form_serv_name = null,
-        $form_check_by = null,
-        $form_date_serv_name = null,
-        $form_serv_comment = null,
-        $form_superior_aprd = null,
-        $form_superior_comment = null,
-        $form_sadmin_comment = null,
-        $form_shead_aprd = null,
-        $form_shead_comment = null,
-        $form_date_check_by = null,
-        $from_date_update = null,
-        $form_user_update = null,
+        $id_from,
+        $form_no,
+        $form_serv_name,
+        $form_check_by,
+        $form_date_serv_name,
+        $form_serv_comment,
+        $form_superior_aprd,
+        $form_superior_comment,
+        $form_sadmin_comment,
+        $form_shead_aprd,
+        $form_shead_comment,
+        $form_date_check_by,
+        $from_date_update,
+        $form_user_update,
+        $form_date_superior_aprd,
+        $form_date_sadmin_comment,
+        $form_date_shead_aprd,
+        $form_milestone,
+        $form_status_order,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_form;
@@ -205,20 +210,25 @@ class Proses_sql extends DbTable
     }
 
     public function add_form(
-        $id_from = null,
-        $form_no = null,
-        $form_serv_name = null,
-        $form_check_by = null,
-        $form_date_serv_name = null,
-        $form_serv_comment = null,
-        $form_superior_aprd = null,
-        $form_superior_comment = null,
-        $form_sadmin_comment = null,
-        $form_shead_aprd = null,
-        $form_shead_comment = null,
-        $form_date_check_by = null,
-        $from_date_update = null,
-        $form_user_update = null,
+        $id_from,
+        $form_no,
+        $form_serv_name,
+        $form_serv_comment,
+        $form_date_serv_name,
+        $form_check_by,
+        $form_date_check_by,
+        $form_superior_aprd,
+        $form_superior_comment,
+        $form_date_superior_aprd,
+        $form_sadmin_comment,
+        $form_date_sadmin_comment,
+        $form_shead_aprd,
+        $form_shead_comment,
+        $form_milestone,
+        $form_status_order,
+        $form_date_shead_aprd,
+        $from_date_update,
+        $form_user_update,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_form;
@@ -239,7 +249,12 @@ class Proses_sql extends DbTable
             form_shead_comment = '$form_shead_comment',
             form_date_check_by = '$form_date_check_by',
             from_date_update = '$from_date_update',
-            form_user_update = '$form_user_update'
+            form_user_update = '$form_user_update',
+            form_date_superior_aprd = '$form_date_superior_aprd',
+            form_date_sadmin_comment = '$form_date_sadmin_comment',
+            form_date_shead_aprd = '$form_date_shead_aprd',
+            form_milestone = '$form_milestone',
+            form_status_order = '$form_status_order'
             ";
 
         ($query = $db->query($sql)) or die($db->error);
@@ -247,20 +262,25 @@ class Proses_sql extends DbTable
     }
 
     public function edit_form(
-        $id_from = null,
-        $form_no = null,
-        $form_serv_name = null,
-        $form_check_by = null,
-        $form_date_serv_name = null,
-        $form_serv_comment = null,
-        $form_superior_aprd = null,
-        $form_superior_comment = null,
-        $form_sadmin_comment = null,
-        $form_shead_aprd = null,
-        $form_shead_comment = null,
-        $form_date_check_by = null,
-        $from_date_update = null,
-        $form_user_update = null,
+        $id_from,
+        $form_no,
+        $form_serv_name,
+        $form_serv_comment,
+        $form_date_serv_name,
+        $form_check_by,
+        $form_date_check_by,
+        $form_superior_aprd,
+        $form_superior_comment,
+        $form_date_superior_aprd,
+        $form_sadmin_comment,
+        $form_date_sadmin_comment,
+        $form_shead_aprd,
+        $form_shead_comment,
+        $form_milestone,
+        $form_status_order,
+        $form_date_shead_aprd,
+        $from_date_update,
+        $form_user_update,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_form;
@@ -280,7 +300,12 @@ class Proses_sql extends DbTable
             form_shead_comment = '$form_shead_comment',
             form_date_check_by = '$form_date_check_by',
             from_date_update = '$from_date_update',
-            form_user_update = '$form_user_update'
+            form_user_update = '$form_user_update',
+            form_date_superior_aprd = '$form_date_superior_aprd',
+            form_date_sadmin_comment = '$form_date_sadmin_comment',
+            form_date_shead_aprd = '$form_date_shead_aprd',
+            form_milestone = '$form_milestone',
+            form_status_order = '$form_status_order'
             WHERE id_from = '$id_from'
             ";
 
@@ -289,20 +314,25 @@ class Proses_sql extends DbTable
     }
 
     public function delete_form(
-        $id_from = null,
-        $form_no = null,
-        $form_serv_name = null,
-        $form_check_by = null,
-        $form_date_serv_name = null,
-        $form_serv_comment = null,
-        $form_superior_aprd = null,
-        $form_superior_comment = null,
-        $form_sadmin_comment = null,
-        $form_shead_aprd = null,
-        $form_shead_comment = null,
-        $form_date_check_by = null,
-        $from_date_update = null,
-        $form_user_update = null,
+        $id_from,
+        $form_no,
+        $form_serv_name,
+        $form_serv_comment,
+        $form_date_serv_name,
+        $form_check_by,
+        $form_date_check_by,
+        $form_superior_aprd,
+        $form_superior_comment,
+        $form_date_superior_aprd,
+        $form_sadmin_comment,
+        $form_date_sadmin_comment,
+        $form_shead_aprd,
+        $form_shead_comment,
+        $form_milestone,
+        $form_status_order,
+        $form_date_shead_aprd,
+        $from_date_update,
+        $form_user_update,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_form;
@@ -319,16 +349,16 @@ class Proses_sql extends DbTable
     // ------------- TABEL FORM DETAIL ----------------------
 
     public function data_form_detail(
-        $id_form_detail = null,
-        $id_form = null,
-        $form_comment = null,
-        $pn_group = null,
-        $pn_desc = null,
-        $qty = null,
-        $explan = null,
-        $action_note = null,
-        $form_detail_date = null,
-        $form_detail_user = null,
+        $id_form_detail,
+        $id_form,
+        $form_comment,
+        $pn_group,
+        $pn_desc,
+        $qty,
+        $explan,
+        $action_note,
+        $form_detail_date,
+        $form_detail_user,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_form_detail;
@@ -347,16 +377,16 @@ class Proses_sql extends DbTable
     }
 
     public function add_form_detail(
-        $id_form_detail = null,
-        $id_form = null,
-        $form_comment = null,
-        $pn_group = null,
-        $pn_desc = null,
-        $qty = null,
-        $explan = null,
-        $action_note = null,
-        $form_detail_date = null,
-        $form_detail_user = null,
+        $id_form_detail,
+        $id_form,
+        $form_comment,
+        $pn_group,
+        $pn_desc,
+        $qty,
+        $explan,
+        $action_note,
+        $form_detail_date,
+        $form_detail_user,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_form_detail;
@@ -381,16 +411,16 @@ class Proses_sql extends DbTable
     }
 
     public function edit_form_form(
-        $id_form_detail = null,
-        $id_form = null,
-        $form_comment = null,
-        $pn_group = null,
-        $pn_desc = null,
-        $qty = null,
-        $explan = null,
-        $action_note = null,
-        $form_detail_date = null,
-        $form_detail_user = null,
+        $id_form_detail,
+        $id_form,
+        $form_comment,
+        $pn_group,
+        $pn_desc,
+        $qty,
+        $explan,
+        $action_note,
+        $form_detail_date,
+        $form_detail_user,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_form_detail;
@@ -415,16 +445,16 @@ class Proses_sql extends DbTable
     }
 
     public function delete_form_detail(
-        $id_form_detail = null,
-        $id_form = null,
-        $form_comment = null,
-        $pn_group = null,
-        $pn_desc = null,
-        $qty = null,
-        $explan = null,
-        $action_note = null,
-        $form_detail_date = null,
-        $form_detail_user = null,
+        $id_form_detail,
+        $id_form,
+        $form_comment,
+        $pn_group,
+        $pn_desc,
+        $qty,
+        $explan,
+        $action_note,
+        $form_detail_date,
+        $form_detail_user,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_form_detail;
@@ -440,11 +470,11 @@ class Proses_sql extends DbTable
     // ------------- TABEL ACTION NOTE --------------------
 
     public function data_action_note(
-        $id_action_note = null,
-        $id_form = null,
-        $action_note_desc = null,
-        $action_date_update = null,
-        $action_note_user = null,
+        $id_action_note,
+        $id_form,
+        $action_note_desc,
+        $action_date_update,
+        $action_note_user,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_action_note;
@@ -463,11 +493,11 @@ class Proses_sql extends DbTable
     }
 
     public function add_action_note(
-        $id_action_note = null,
-        $id_form = null,
-        $action_note_desc = null,
-        $action_date_update = null,
-        $action_note_user = null,
+        $id_action_note,
+        $id_form,
+        $action_note_desc,
+        $action_date_update,
+        $action_note_user,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_action_note;
@@ -487,11 +517,11 @@ class Proses_sql extends DbTable
     }
 
     public function edit_action_note(
-        $id_action_note = null,
-        $id_form = null,
-        $action_note_desc = null,
-        $action_date_update = null,
-        $action_note_user = null,
+        $id_action_note,
+        $id_form,
+        $action_note_desc,
+        $action_date_update,
+        $action_note_user,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_action_note;
@@ -511,11 +541,11 @@ class Proses_sql extends DbTable
     }
 
     public function delete_action_note(
-        $id_action_note = null,
-        $id_form = null,
-        $action_note_desc = null,
-        $action_date_update = null,
-        $action_note_user = null,
+        $id_action_note,
+        $id_form,
+        $action_note_desc,
+        $action_date_update,
+        $action_note_user,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_action_note;
