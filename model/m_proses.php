@@ -357,6 +357,8 @@ class Proses_sql extends DbTable
         $qty,
         $explan,
         $action_note,
+        $val_type,
+        $part_value,
         $form_detail_date,
         $form_detail_user,
     ) {
@@ -385,6 +387,8 @@ class Proses_sql extends DbTable
         $qty,
         $explan,
         $action_note,
+        $val_type,
+        $part_value,
         $form_detail_date,
         $form_detail_user,
     ) {
@@ -402,6 +406,8 @@ class Proses_sql extends DbTable
             qty = '$qty',
             explan = '$explan',
             action_note = '$action_note',
+            val_type = '$val_type',
+            part_value = '$part_value',
             form_detail_date = '$form_detail_date',
             form_detail_user = '$form_detail_user'
             ";
@@ -419,6 +425,8 @@ class Proses_sql extends DbTable
         $qty,
         $explan,
         $action_note,
+        $val_type,
+        $part_value,
         $form_detail_date,
         $form_detail_user,
     ) {
@@ -435,6 +443,8 @@ class Proses_sql extends DbTable
             qty = '$qty',
             explan = '$explan',
             action_note = '$action_note',
+            val_type = '$val_type',
+            part_value = '$part_value',     
             form_detail_date = '$form_detail_date',
             form_detail_user = '$form_detail_user'
             WHERE id_form_detail = '$id_form_detail'
@@ -453,6 +463,8 @@ class Proses_sql extends DbTable
         $qty,
         $explan,
         $action_note,
+        $val_type,
+        $part_value,
         $form_detail_date,
         $form_detail_user,
     ) {
