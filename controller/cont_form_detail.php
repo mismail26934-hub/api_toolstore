@@ -23,10 +23,10 @@
             @$form_detail_date = $_POST["form_detail_date"];
             @$form_detail_user = $_POST["form_detail_user"];
 
-            @$add_data_form_detail = "ADD DATA";
-            @$edit_data_form_detail = "EDIT DATA";
-            @$view_data_form_detail = "VIEW DATA";
-            @$delete_data_form_detail = "DELETED DATA";
+            @$add_data_form_detail = "ADD DATA TOOL";
+            @$edit_data_form_detail = "EDIT DATA TOOL";
+            @$view_data_form_detail = "VIEW DATA TOOL";
+            @$delete_data_form_detail = "DELETED DATA TOOL";
 
             if (
                 @$param == @$add_data_form_detail ||
@@ -95,6 +95,7 @@
                         $b["id_form"] = $id_form;
                         $b["form_comment"] = $form_comment;
                         $b["pn_group"] = $pn_group;
+                        $b["pn_desc"] = $pn_desc;
                         $b["qty"] = $qty;
                         $b["explan"] = $explan;
                         $b["action_note"] = $action_note;
@@ -137,7 +138,7 @@
                         }
                     }
                     break;
-                case $edit_data_form:
+                case $edit_data_form_detail:
                     if (
                         @$id_form_detail != @$id_form_detail_cek &&
                         $id_form == $id_form_cek
@@ -151,7 +152,7 @@
                         $response["value"] = "0";
                         $response["message"] = "ERROR $param !";
                     } else {
-                        @$edit_form = $data->edit_form_form(
+                        @$edit_form = $data->edit_form_detail(
                             @$id_form_detail,
                             @$id_form,
                             @$form_comment,
@@ -179,7 +180,7 @@
                         $response["value"] = "0";
                         $response["message"] = "ERROR $param !";
                     } else {
-                        @$delete_form = $data->delete_form_detail(
+                        @$delete_data_form_detail = $data->delete_form_detail(
                             @$id_form_detail,
                             @$id_form,
                             @$form_comment,
@@ -194,7 +195,7 @@
                             @$form_detail_user,
                         );
                     }
-                    if (@$delete_form) {
+                    if (@$delete_data_form_detail) {
                         $response["value"] = "1";
                         $response["message"] = "$param SUCCESS";
                     } else {

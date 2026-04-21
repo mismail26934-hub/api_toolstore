@@ -5,6 +5,9 @@ class DbTable
     protected $tb_action_note = "tb_action_note";
     protected $tb_form = "tb_form";
     protected $tb_form_detail = "tb_form_detail";
+    protected $tb_po = "tb_po";
+    protected $tb_so = "tb_so";
+    protected $tb_superior = "tb_superior";
 
     protected $sql_select_distinct = "SELECT DISTINCT ";
     protected $sql_select = "SELECT * FROM ";
@@ -57,6 +60,7 @@ class Proses_sql extends DbTable
         $token,
         $level,
         $status,
+        $superior_id,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
@@ -87,6 +91,7 @@ class Proses_sql extends DbTable
         $token,
         $level,
         $status,
+        $superior_id,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
@@ -103,7 +108,9 @@ class Proses_sql extends DbTable
             no_telp = '$no_telp',
             token = '$token',
             level = '$level',
-            status = '$status'
+            status = '$status',
+            superior_id = '$superior_id'
+            
             ";
 
         ($query = $db->query($sql)) or die($db->error);
@@ -121,6 +128,7 @@ class Proses_sql extends DbTable
         $token,
         $level,
         $status,
+        $superior_id,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
@@ -136,7 +144,8 @@ class Proses_sql extends DbTable
             no_telp = '$no_telp',
             token = '$token',
             level = '$level',
-            status = '$status'
+            status = '$status',
+            superior_id = '$superior_id'
             WHERE id_users = '$id_users'
             ";
 
@@ -155,14 +164,14 @@ class Proses_sql extends DbTable
         $token,
         $level,
         $status,
+        $superior_id,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
         $delete = $this->sql_delete;
         $sql = $delete;
         $sql .= $table;
-        $sql .= " WHERE id_users = '$id_users'
-            ";
+        $sql .= " WHERE id_users = '$id_users'";
 
         ($query = $db->query($sql)) or die($db->error);
         return $query;
@@ -416,7 +425,7 @@ class Proses_sql extends DbTable
         return $query;
     }
 
-    public function edit_form_form(
+    public function edit_form_detail(
         $id_form_detail,
         $id_form,
         $form_comment,
@@ -565,6 +574,298 @@ class Proses_sql extends DbTable
         $sql = $delete;
         $sql .= $table;
         $sql .= " WHERE id_action_note = '$id_action_note'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    // ------------- TABEL PO ----------------------
+
+    public function data_po(
+        $id_po,
+        $id_form_detail,
+        $po_no,
+        $date_update_po,
+        $user_update_po,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_po;
+        $select = $this->sql_select;
+        $sql = $select;
+        $sql .= $table;
+        if (@$id_po != null || @$id_po != "") {
+            $sql .= " WHERE id_po = '$id_po' ";
+        } elseif (@$id_form_detail != null || @$id_form_detail != "") {
+            $sql .= " WHERE id_form_detail = '$id_form_detail' ";
+        } elseif (@$po_no != null || @$po_no != "") {
+            $sql .= " WHERE po_no = '$po_no' ";
+        } else {
+            $sql .= " ORDER BY id_form_detail ASC";
+        }
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function add_po(
+        $id_po,
+        $id_form_detail,
+        $po_no,
+        $date_update_po,
+        $user_update_po,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_po;
+        $insert = $this->sql_insert;
+        $sql = $insert;
+        $sql .= $table;
+        $sql .= " SET 
+            id_po = '$id_po',
+            id_form_detail = '$id_form_detail',
+            po_no = '$po_no',
+            date_update_po = '$date_update_po',
+            user_update_po = '$user_update_po'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function edit_po(
+        $id_po,
+        $id_form_detail,
+        $po_no,
+        $date_update_po,
+        $user_update_po,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_po;
+        $update = $this->sql_update;
+        $sql = $update;
+        $sql .= $table;
+        $sql .= " SET
+            id_form_detail = '$id_form_detail',
+            po_no = '$po_no',
+            date_update_po = '$date_update_po',
+            user_update_po = '$user_update_po'
+            WHERE id_po = '$id_po'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function delete_po(
+        $id_po,
+        $id_form_detail,
+        $po_no,
+        $date_update_po,
+        $user_update_po,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_po;
+        $delete = $this->sql_delete;
+        $sql = $delete;
+        $sql .= $table;
+        $sql .= " WHERE id_po = '$id_po'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    // ------------- TABEL SO ----------------------
+
+    public function data_so(
+        $id_so,
+        $id_form_detail,
+        $so,
+        $eta,
+        $note_so,
+        $date_update_so,
+        $id_update_so,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_so;
+        $select = $this->sql_select;
+        $sql = $select;
+        $sql .= $table;
+        if (@$id_so != null || @$id_so != "") {
+            $sql .= " WHERE id_so = '$id_so' ";
+        } elseif (@$id_form_detail != null || @$id_form_detail != "") {
+            $sql .= " WHERE id_form_detail = '$id_form_detail' ";
+        } elseif (@$so != null || @$so != "") {
+            $sql .= " WHERE so = '$so' ";
+        } else {
+            $sql .= " ORDER BY id_form_detail ASC";
+        }
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function add_so(
+        $id_so,
+        $id_form_detail,
+        $so,
+        $eta,
+        $note_so,
+        $date_update_so,
+        $id_update_so,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_so;
+        $insert = $this->sql_insert;
+        $sql = $insert;
+        $sql .= $table;
+        $sql .= " SET 
+            id_so = '$id_so',
+            id_form_detail = '$id_form_detail',
+            so = '$so',
+            eta = '$eta',
+            note_so = '$note_so',
+            date_update_so = '$date_update_so',
+            id_update_so = '$id_update_so'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function edit_so(
+        $id_so,
+        $id_form_detail,
+        $so,
+        $eta,
+        $note_so,
+        $date_update_so,
+        $id_update_so,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_so;
+        $update = $this->sql_update;
+        $sql = $update;
+        $sql .= $table;
+        $sql .= " SET
+            id_form_detail = '$id_form_detail',
+            so = '$so',
+            eta = '$eta',
+            note_so = '$note_so',
+            date_update_so = '$date_update_so',
+            id_update_so = '$id_update_so'
+            WHERE id_so = '$id_so'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function delete_so(
+        $id_so,
+        $id_form_detail,
+        $so,
+        $eta,
+        $note_so,
+        $date_update_so,
+        $id_update_so,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_so;
+        $delete = $this->sql_delete;
+        $sql = $delete;
+        $sql .= $table;
+        $sql .= " WHERE id_so = '$id_so'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    // ------------- TABEL SUPERRIOR ----------------------
+
+    public function data_superrior(
+        $superior_id,
+        $nama_superior,
+        $status_superior,
+        $user_id_input_superior,
+        $date_input_superior,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_superior;
+        $select = $this->sql_select;
+        $sql = $select;
+        $sql .= $table;
+        if (@$superior_id != null || @$superior_id != "") {
+            $sql .= " WHERE superior_id = '$superior_id' ";
+        } elseif (@$nama_superior != null || @$nama_superior != "") {
+            $sql .= " WHERE nama_superior = '$nama_superior' ";
+        } else {
+            $sql .= " ORDER BY nama_superior ASC";
+        }
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function add_superrior(
+        $superior_id,
+        $nama_superior,
+        $status_superior,
+        $user_id_input_superior,
+        $date_input_superior,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_superior;
+        $insert = $this->sql_insert;
+        $sql = $insert;
+        $sql .= $table;
+        $sql .= " SET 
+            superior_id = '$superior_id',
+            nama_superior = '$nama_superior',
+            status_superior = '$status_superior',
+            user_id_input_superior = '$user_id_input_superior',
+            date_input_superior = '$date_input_superior'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function edit_superrior(
+        $superior_id,
+        $nama_superior,
+        $status_superior,
+        $user_id_input_superior,
+        $date_input_superior,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_superior;
+        $update = $this->sql_update;
+        $sql = $update;
+        $sql .= $table;
+        $sql .= " SET
+            nama_superior = '$nama_superior',
+            status_superior = '$status_superior',
+            user_id_input_superior = '$user_id_input_superior',
+            date_input_superior = '$date_input_superior'
+            WHERE superior_id = '$superior_id'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function delete_superrior(
+        $superior_id,
+        $nama_superior,
+        $status_superior,
+        $user_id_input_superior,
+        $date_input_superior,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_superior;
+        $delete = $this->sql_delete;
+        $sql = $delete;
+        $sql .= $table;
+        $sql .= " WHERE superior_id = '$superior_id'
             ";
 
         ($query = $db->query($sql)) or die($db->error);

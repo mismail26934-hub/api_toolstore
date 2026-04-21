@@ -21,6 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     @$token = $_POST["token"];
     @$level = $_POST["level"];
     @$status = $_POST["status"];
+    @$superior_id = $_POST["superior_id"];
     @$add_data_user = "ADD DATA USER";
     @$edit_data_user = "EDIT DATA USER";
     @$view_data_user = "VIEW DATA USER";
@@ -37,6 +38,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 : @$id_users,
             @$username,
             @$nama_user,
+            "",
+            "",
             "",
             "",
             "",
@@ -62,6 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$token = $row_user->token;
                     @$level = $row_user->level;
                     @$status = $row_user->status;
+                    @$superior_id = $row_user->superior_id;
                 } else {
                     @$id_users = "";
                     @$username = "";
@@ -73,6 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$token = "";
                     @$level = "";
                     @$status = "";
+                    @$superior_id = "";
                 }
                 $b["id_users"] = $id_users;
                 $b["username"] = $username;
@@ -85,6 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $b["token"] = $token;
                 $b["level"] = $level;
                 $b["status"] = $status;
+                $b["superior_id"] = $superior_id;
 
                 array_push($result, $b);
             }
@@ -108,6 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$token,
                     @$level,
                     @$status,
+                    @$superior_id,
                 );
                 if ($add_user) {
                     $response["value"] = "1";
@@ -140,6 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$token,
                     @$level,
                     @$status,
+                    @$superior_id,
                 );
                 if ($edit_user) {
                     $response["value"] = "1";
@@ -155,7 +163,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
             } else {
-                @$delete_user = $data->delete_user(@$id_users);
+                @$delete_user = $data->delete_user(
+                    @$id_users,
+                    @$username,
+                    @$password,
+                    @$nama_user,
+                    @$foto,
+                    @$id_tu,
+                    @$no_telp,
+                    @$token,
+                    @$level,
+                    @$status,
+                    @$superior_id,
+                );
             }
             if (@$delete_user) {
                 $response["value"] = "1";
