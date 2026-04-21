@@ -127,6 +127,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             } else {
                 @$delete_action_note = $data->delete_action_note(
                     @$id_action_note,
+                    "",
+                    "",
+                    "",
+                    "",
                 );
             }
             if (@$delete_action_note) {
