@@ -22,6 +22,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     // 11.REJECTED
     // ----------------------------------------------
     @$param = $_POST["param"];
+    @$page = isset($_POST["page"]) ? (int) $_POST["page"] : 1;
+    @$limit = isset($_POST["limit"]) ? (int) $_POST["limit"] : 20;
+    @$offset = ($page - 1) * $limit;
+
     @$id_form = $_POST["id_form"];
     @$form_no = $_POST["form_no"];
     @$form_serv_name = $_POST["form_serv_name"];
@@ -74,6 +78,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             "",
             "",
             "",
+            @$limit,
+            @$offset,
         );
         if (@$param == @$add_data_form || @$param == @$edit_data_form) {
             @$row_form_cek = $data_form->fetch_object();

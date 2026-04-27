@@ -199,6 +199,8 @@ class Proses_sql extends DbTable
         $form_date_shead_aprd,
         $form_milestone,
         $form_status_order,
+        $limit,
+        $offset,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_form;
@@ -212,7 +214,7 @@ class Proses_sql extends DbTable
         } elseif (@$form_serv_name != null || @$form_serv_name != "") {
             $sql .= " WHERE form_serv_name = '$form_serv_name' ";
         } else {
-            $sql .= " ORDER BY form_no ASC";
+            $sql .= " ORDER BY form_no ASC LIMIT $limit OFFSET $offset";
         }
         ($query = $db->query($sql)) or die($db->error);
         return $query;

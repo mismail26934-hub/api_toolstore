@@ -85,21 +85,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     }
 
     switch ($param) {
-        case $add_data_so:
+        case $add_data_superrior:
             if (isset($row_superrior_cek)) {
                 $response["value"] = "0";
                 $response["message"] = "FORM NUMBER DUPLICATE";
             } else {
-                @$add_so = $data->add_so(
-                    @$id_so,
-                    @$id_form_detail,
-                    @$so,
-                    @$eta,
-                    @$note_so,
-                    @$date_update_so,
-                    @$id_update_so,
+                @$add_superrrior = $data->add_superrior(
+                    @$superior_id,
+                    @$nama_superior,
+                    @$status_superior,
+                    @$user_id_input_superior,
+                    @$date_input_superior,
                 );
-                if ($add_so) {
+                if ($add_superrrior) {
                     $response["value"] = "1";
                     $response["message"] = "$param SUCCESS";
                 } else {
@@ -108,27 +106,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 }
             }
             break;
-        case $edit_data_so:
+        case $edit_data_superrior:
             if (
-                @$id_so != @$id_so_cek &&
-                $id_form_detail == $id_form_detail_cek
+                @$superior_id != @$superior_id_cek &&
+                $nama_superior == $nama_superior_cek
             ) {
                 $response["value"] = "0";
                 $response["message"] = "FORM NUMBER DUPLICATE !";
-            } elseif (@$id_so == null || @$id_so == "") {
+            } elseif (@$superior_id == null || @$superior_id == "") {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
             } else {
-                @$edit_so = $data->edit_so(
-                    @$id_so,
-                    @$id_form_detail,
-                    @$so,
-                    @$eta,
-                    @$note_so,
-                    @$date_update_so,
-                    @$id_update_so,
+                @$edit_superrior = $data->edit_superrior(
+                    @$superior_id,
+                    @$nama_superior,
+                    @$status_superior,
+                    @$user_id_input_superior,
+                    @$date_input_superior,
                 );
-                if ($edit_so) {
+                if ($edit_superrior) {
                     $response["value"] = "1";
                     $response["message"] = "$param SUCCESS";
                 } else {
@@ -137,12 +133,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 }
             }
             break;
-        case @$delete_data_so:
-            if (@$id_so == null || @$id_so == "") {
+        case @$delete_data_superrior:
+            if (@$superior_id == null || @$superior_id == "") {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
             } else {
-                @$delete_so = $data->delete_so(@$id_so, "", "", "", "", "", "");
+                @$delete_superrior = $data->delete_superrior(
+                    @$superior_id,
+                    "",
+                    "",
+                    "",
+                    "",
+                );
             }
             if (@$delete_so) {
                 $response["value"] = "1";
@@ -159,13 +161,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     }
 
     switch ($param) {
-        case $add_data_so:
+        case $add_data_superrior:
             array_push($result, $response);
             break;
-        case $edit_data_so:
+        case $edit_data_superrior:
             array_push($result, $response);
             break;
-        case $delete_data_so:
+        case $delete_data_superrior:
             array_push($result, $response);
             break;
         default:
