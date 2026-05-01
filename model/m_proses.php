@@ -8,6 +8,8 @@ class DbTable
     protected $tb_po = "tb_po";
     protected $tb_so = "tb_so";
     protected $tb_superior = "tb_superior";
+    protected $tb_rcv_tool = "tb_rcv_tool";
+    protected $tb_rcv_wh = "tb_rcv_wh";
 
     protected $sql_select_distinct = "SELECT DISTINCT ";
     protected $sql_select = "SELECT * FROM ";
@@ -370,6 +372,7 @@ class Proses_sql extends DbTable
         $action_note,
         $val_type,
         $part_value,
+        $form_detail_milestone,
         $form_detail_date,
         $form_detail_user,
     ) {
@@ -400,6 +403,7 @@ class Proses_sql extends DbTable
         $action_note,
         $val_type,
         $part_value,
+        $form_detail_milestone,
         $form_detail_date,
         $form_detail_user,
     ) {
@@ -419,6 +423,7 @@ class Proses_sql extends DbTable
             action_note = '$action_note',
             val_type = '$val_type',
             part_value = '$part_value',
+            form_detail_milestone = '$form_detail_milestone',
             form_detail_date = '$form_detail_date',
             form_detail_user = '$form_detail_user'
             ";
@@ -438,6 +443,7 @@ class Proses_sql extends DbTable
         $action_note,
         $val_type,
         $part_value,
+        $form_detail_milestone,
         $form_detail_date,
         $form_detail_user,
     ) {
@@ -456,6 +462,7 @@ class Proses_sql extends DbTable
             action_note = '$action_note',
             val_type = '$val_type',
             part_value = '$part_value',     
+            form_detail_milestone = '$form_detail_milestone',     
             form_detail_date = '$form_detail_date',
             form_detail_user = '$form_detail_user'
             WHERE id_form_detail = '$id_form_detail'
@@ -476,6 +483,7 @@ class Proses_sql extends DbTable
         $action_note,
         $val_type,
         $part_value,
+        $form_detail_milestone,
         $form_detail_date,
         $form_detail_user,
     ) {
@@ -494,7 +502,7 @@ class Proses_sql extends DbTable
 
     public function data_action_note(
         $id_action_note,
-        $id_form,
+        $note_initial,
         $action_note_desc,
         $action_date_update,
         $action_note_user,
@@ -506,8 +514,8 @@ class Proses_sql extends DbTable
         $sql .= $table;
         if (@$id_action_note != null || @$id_action_note != "") {
             $sql .= " WHERE id_action_note = '$id_action_note' ";
-        } elseif (@$id_form != null || @$id_form != "") {
-            $sql .= " WHERE id_form = '$id_form' ";
+        } elseif (@$action_note_desc != null || @$action_note_desc != "") {
+            $sql .= " WHERE action_note_desc = '$action_note_desc' ";
         } else {
             $sql .= " ORDER BY id_action_note ASC";
         }
@@ -517,7 +525,7 @@ class Proses_sql extends DbTable
 
     public function add_action_note(
         $id_action_note,
-        $id_form,
+        $note_initial,
         $action_note_desc,
         $action_date_update,
         $action_note_user,
@@ -529,7 +537,7 @@ class Proses_sql extends DbTable
         $sql .= $table;
         $sql .= " SET 
             id_action_note = '$id_action_note',
-            id_form = '$id_form',
+            note_initial = '$note_initial',
             action_note_desc = '$action_note_desc',
             action_date_update = '$action_date_update',
             action_note_user = '$action_note_user'
@@ -541,7 +549,7 @@ class Proses_sql extends DbTable
 
     public function edit_action_note(
         $id_action_note,
-        $id_form,
+        $note_initial,
         $action_note_desc,
         $action_date_update,
         $action_note_user,
@@ -553,7 +561,7 @@ class Proses_sql extends DbTable
         $sql .= $table;
         $sql .= " SET
             action_note_desc = '$action_note_desc',
-            id_form = '$id_form',
+            note_initial = '$note_initial',
             action_date_update = '$action_date_update',
             action_note_user = '$action_note_user'
             WHERE id_action_note = '$id_action_note'
@@ -565,7 +573,7 @@ class Proses_sql extends DbTable
 
     public function delete_action_note(
         $id_action_note,
-        $id_form,
+        $note_initial,
         $action_note_desc,
         $action_date_update,
         $action_note_user,
@@ -868,6 +876,201 @@ class Proses_sql extends DbTable
         $sql = $delete;
         $sql .= $table;
         $sql .= " WHERE superior_id = '$superior_id'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    function __destruct()
+    {
+        $db = $this->mysqli->conn;
+        $db = $db->close();
+    }
+    // ------------- TABEL RCV WH ----------------------
+
+    public function data_rcv_wh(
+        $id_rcv_wh,
+        $id_form_detail,
+        $rcv_wh_date,
+        $rcv_wh_id_input,
+        $rcv_wh_date_input,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_rcv_wh;
+        $select = $this->sql_select;
+        $sql = $select;
+        $sql .= $table;
+        if (@$id_rcv_wh != null || @$id_rcv_wh != "") {
+            $sql .= " WHERE id_rcv_wh = '$id_rcv_wh' ";
+        } elseif (@$id_form_detail != null || @$id_form_detail != "") {
+            $sql .= " WHERE id_form_detail = '$id_form_detail' ";
+        } else {
+            $sql .= " ORDER BY id_form_detail ASC";
+        }
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function add_rcv_wh(
+        $id_rcv_wh,
+        $id_form_detail,
+        $rcv_wh_date,
+        $rcv_wh_id_input,
+        $rcv_wh_date_input,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_rcv_wh;
+        $insert = $this->sql_insert;
+        $sql = $insert;
+        $sql .= $table;
+        $sql .= " SET 
+            id_rcv_wh = '$id_rcv_wh',
+            id_form_detail = '$id_form_detail',
+            rcv_wh_date = '$rcv_wh_date',
+            rcv_wh_id_input = '$rcv_wh_id_input',
+            rcv_wh_date_input = '$rcv_wh_date_input'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function edit_rcv_wh(
+        $id_rcv_wh,
+        $id_form_detail,
+        $rcv_wh_date,
+        $rcv_wh_id_input,
+        $rcv_wh_date_input,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_rcv_wh;
+        $update = $this->sql_update;
+        $sql = $update;
+        $sql .= $table;
+        $sql .= " SET
+            id_form_detail = '$id_form_detail',
+            rcv_wh_date = '$rcv_wh_date',
+            rcv_wh_id_input = '$rcv_wh_id_input',
+            rcv_wh_date_input = '$date_input_superior'
+            WHERE id_rcv_wh = '$id_rcv_wh'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function delete_rcv_wh(
+        $id_rcv_wh,
+        $id_form_detail,
+        $rcv_wh_date,
+        $rcv_wh_id_input,
+        $rcv_wh_date_input,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_rcv_wh;
+        $delete = $this->sql_delete;
+        $sql = $delete;
+        $sql .= $table;
+        $sql .= " WHERE id_rcv_wh = '$id_rcv_wh'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    function __destruct()
+    {
+        $db = $this->mysqli->conn;
+        $db = $db->close();
+    }
+}
+    // ------------- TABEL RCV TOOL ----------------------
+
+    public function data_rcv_tool(
+        $id_rcv_tool,
+        $id_form_detail,
+        $rcv_tool_date,
+        $rcv_tool_id_input,
+        $rcv_tool_date_input,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_rcv_tool;
+        $select = $this->sql_select;
+        $sql = $select;
+        $sql .= $table;
+        if (@$id_rcv_tool != null || @$id_rcv_tool != "") {
+            $sql .= " WHERE id_rcv_tool = '$id_rcv_tool' ";
+        } elseif (@$id_form_detail != null || @$id_form_detail != "") {
+            $sql .= " WHERE id_form_detail = '$id_form_detail' ";
+        } else {
+            $sql .= " ORDER BY id_form_detail ASC";
+        }
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function add_rcv_wh(
+        $id_rcv_tool,
+        $id_form_detail,
+        $rcv_tool_date,
+        $rcv_tool_id_input,
+        $rcv_tool_date_input,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_rcv_tool;
+        $insert = $this->sql_insert;
+        $sql = $insert;
+        $sql .= $table;
+        $sql .= " SET 
+            id_rcv_tool = '$id_rcv_tool',
+            id_form_detail = '$id_form_detail',
+            rcv_tool_date = '$rcv_tool_date',
+            rcv_tool_id_input = '$rcv_tool_id_input',
+            rcv_tool_date_input = '$rcv_tool_date_input'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function edit_rcv_tool(
+        $id_rcv_tool,
+        $id_form_detail,
+        $rcv_tool_date,
+        $rcv_tool_id_input,
+        $rcv_tool_date_input,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_rcv_tool;
+        $update = $this->sql_update;
+        $sql = $update;
+        $sql .= $table;
+        $sql .= " SET
+            id_form_detail = '$id_form_detail',
+            rcv_tool_date = '$rcv_tool_date',
+            rcv_tool_id_input = '$rcv_tool_id_input',
+            rcv_tool_date_input = '$rcv_tool_date_input'
+            WHERE id_rcv_tool = '$id_rcv_tool'
+            ";
+
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    public function delete_rcv_tool(
+        $id_rcv_tool,
+        $id_form_detail,
+        $rcv_tool_date,
+        $rcv_tool_id_input,
+        $rcv_tool_date_input,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_rcv_tool;
+        $delete = $this->sql_delete;
+        $sql = $delete;
+        $sql .= $table;
+        $sql .= " WHERE id_rcv_tool = '$id_rcv_tool'
             ";
 
         ($query = $db->query($sql)) or die($db->error);

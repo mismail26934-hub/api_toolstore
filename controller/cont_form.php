@@ -23,6 +23,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     // ----------------------------------------------
     @$param = $_POST["param"];
     @$page = isset($_POST["page"]) ? (int) $_POST["page"] : 1;
+    if (@$page < 1) {
+        @$page = 1;
+    }
     @$limit = isset($_POST["limit"]) ? (int) $_POST["limit"] : 20;
     @$offset = ($page - 1) * $limit;
 

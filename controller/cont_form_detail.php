@@ -20,6 +20,7 @@
             @$action_note = $_POST["action_note"];
             @$val_type = $_POST["val_type"];
             @$part_value = $_POST["part_value"];
+            @$form_detail_milestone = $_POST["form_detail_milestone"];
             @$form_detail_date = $_POST["form_detail_date"];
             @$form_detail_user = $_POST["form_detail_user"];
 
@@ -41,6 +42,7 @@
                     @$id_form,
                     "",
                     @$pn_group,
+                    "",
                     "",
                     "",
                     "",
@@ -73,6 +75,8 @@
                             @$action_note = $row_form_detail->action_note;
                             @$val_type = $row_form_detail->val_type;
                             @$part_value = $row_form_detail->part_value;
+                            @$form_detail_milestone =
+                                $row_form_detail->form_detail_milestone;
                             @$form_detail_date =
                                 $row_form_detail->form_detail_date;
                             @$form_detail_user =
@@ -88,6 +92,7 @@
                             @$action_note = "";
                             @$val_type = "";
                             @$part_value = "";
+                            @$form_detail_milestone = "";
                             @$form_detail_date = "";
                             @$form_detail_user = "";
                         }
@@ -101,6 +106,7 @@
                         $b["action_note"] = $action_note;
                         $b["val_type"] = $val_type;
                         $b["part_value"] = $part_value;
+                        $b["form_detail_milestone"] = $form_detail_milestone;
                         $b["form_detail_date"] = $form_detail_date;
                         $b["form_detail_user"] = $form_detail_user;
 
@@ -126,6 +132,7 @@
                             @$action_note,
                             @$val_type,
                             @$part_value,
+                            @$form_detail_milestone,
                             @$form_detail_date,
                             @$form_detail_user,
                         );
@@ -163,6 +170,7 @@
                             @$action_note,
                             @$val_type,
                             @$part_value,
+                            @$form_detail_milestone,
                             @$form_detail_date,
                             @$form_detail_user,
                         );
@@ -191,6 +199,7 @@
                             @$action_note,
                             @$val_type,
                             @$part_value,
+                            @$form_detail_milestone,
                             @$form_detail_date,
                             @$form_detail_user,
                         );

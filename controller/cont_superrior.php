@@ -74,7 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$date_input_superior = "";
                 }
                 $b["superior_id"] = $superior_id;
-                $b["nama_superior"] = $id_form_detail;
+                $b["nama_superior"] = $nama_superior;
                 $b["status_superior"] = $status_superior;
                 $b["user_id_input_superior"] = $user_id_input_superior;
                 $b["date_input_superior"] = $date_input_superior;
@@ -146,7 +146,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     "",
                 );
             }
-            if (@$delete_so) {
+            if (@$delete_superrior) {
                 $response["value"] = "1";
                 $response["message"] = "$param SUCCESS";
             } else {
