@@ -8,25 +8,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     $result = [];
     $data = new Proses_sql($connection);
 
-    @$param = $_POST["param"];
-    @$id_form_detail = $_POST["id_form_detail"];
-    @$id_form = $_POST["id_form"];
-    @$form_comment = $_POST["form_comment"];
-    @$pn_group = $_POST["pn_group"];
-    @$pn_desc = $_POST["pn_desc"];
-    @$qty = $_POST["qty"];
-    @$explan = $_POST["explan"];
-    @$action_note = $_POST["action_note"];
-    @$val_type = $_POST["val_type"];
-    @$part_value = $_POST["part_value"];
-    @$form_detail_milestone = $_POST["form_detail_milestone"];
-    @$form_detail_date = $_POST["form_detail_date"];
-    @$form_detail_user = $_POST["form_detail_user"];
+    @$param = trim((string) ($_POST["param"] ?? ""));
+    @$id_form_detail =
+        $_POST["id_form_detail"] ?? ($_POST["idFormDetail"] ?? "");
+    @$id_form =
+        $_POST["id_form"] ?? ($_POST["idFrom"] ?? ($_POST["idForm"] ?? ""));
+    @$form_comment = $_POST["form_comment"] ?? ($_POST["formComment"] ?? "");
+    @$pn_group = $_POST["pn_group"] ?? ($_POST["pnGroup"] ?? "");
+    @$pn_desc = $_POST["pn_desc"] ?? ($_POST["pnDesc"] ?? "");
+    @$qty = $_POST["qty"] ?? "";
+    @$explan = $_POST["explan"] ?? "";
+    @$action_note = $_POST["action_note"] ?? ($_POST["actionNote"] ?? "");
+    @$val_type = $_POST["val_type"] ?? ($_POST["valType"] ?? "");
+    @$part_value = $_POST["part_value"] ?? ($_POST["partValue"] ?? "");
+    @$form_detail_milestone =
+        $_POST["form_detail_milestone"] ??
+        ($_POST["formDetailMilestone"] ?? "");
+    @$form_detail_date =
+        $_POST["form_detail_date"] ?? ($_POST["formDetailDate"] ?? "");
+    @$form_detail_user =
+        $_POST["form_detail_user"] ?? ($_POST["formDetailUser"] ?? "");
 
     @$add_data_form_detail = "ADD DATA TOOL";
     @$edit_data_form_detail = "EDIT DATA TOOL";
     @$view_data_form_detail = "VIEW DATA TOOL";
     @$delete_data_form_detail = "DELETED DATA TOOL";
+
+    if (@$param == "ADD DATA") {
+        @$param = @$add_data_form_detail;
+    } elseif (@$param == "EDIT DATA") {
+        @$param = @$edit_data_form_detail;
+    } elseif (@$param == "VIEW DATA") {
+        @$param = @$view_data_form_detail;
+    } elseif (@$param == "DELETE DATA TOOL" || @$param == "DELETE DATA") {
+        @$param = @$delete_data_form_detail;
+    }
+
+    if (@$action_note != "") {
+        @$action_note = strtoupper(substr(trim((string) $action_note), 0, 1));
+    }
 
     if (
         @$param == @$add_data_form_detail ||
@@ -149,7 +169,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $response["message"] = "FORM NUMBER DUPLICATE !";
             } elseif (@$id_form_detail == null || @$id_form_detail == "") {
                 $response["value"] = "0";
-                $response["message"] = "ERROR $param !";
+                $response["message"] = "ERROR $param $id_form_detail !!";
             } else {
                 @$edit_form = $data->edit_form_detail(
                     @$id_form_detail,

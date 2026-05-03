@@ -164,7 +164,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
         case $add_data_form:
             if (isset($row_form_cek)) {
                 $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE";
+                $response["message"] = "FORM NUMBER DUPLICATE !";
             } else {
                 @$add_form = $data->add_form(
                     @$id_form,
@@ -199,10 +199,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
         case $edit_data_form:
             if (@$id_form != @$id_form_cek && $form_no == $form_no_cek) {
                 $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE !";
+                $response["message"] = "FORM NUMBER DUPLICATE !!";
             } elseif (@$id_form == null || @$id_form == "") {
                 $response["value"] = "0";
-                $response["message"] = "ERROR $param !";
+                $response["message"] = "ERROR $param !!";
             } else {
                 @$edit_form = $data->edit_form(
                     @$id_form,

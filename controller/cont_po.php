@@ -82,7 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
         case $add_data_po:
             if (isset($row_po_cek)) {
                 $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE";
+                $response["message"] = "PO DUPLICATE";
             } else {
                 @$add_po = $data->add_po(
                     @$id_po,
@@ -103,10 +103,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
         case $edit_data_po:
             if (
                 @$id_po != @$id_po_cek &&
-                $id_form_detail == $id_form_detail_cek
+                $id_form_detail == $id_form_detail_cek &&
+                $po_no == $po_no_cek
             ) {
                 $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE !";
+                $response["message"] = "PO DUPLICATE !";
             } elseif (@$id_po == null || @$id_po == "") {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
