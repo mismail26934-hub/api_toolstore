@@ -132,20 +132,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
             } else {
-                @$delete_rcv_wh = $data->delete_rcv_wh(
+                $delete_rcv_wh = $data->delete_rcv_wh(
                     @$id_rcv_wh,
                     "",
                     "",
                     "",
                     "",
                 );
-            }
-            if (@$delete_rcv_wh) {
-                $response["value"] = "1";
-                $response["message"] = "$param SUCCESS";
-            } else {
-                $response["value"] = "0";
-                $response["message"] = "$param FAILED";
+                if ($delete_rcv_wh) {
+                    $response["value"] = "1";
+                    $response["message"] = "$param SUCCESS";
+                } else {
+                    $response["value"] = "0";
+                    $response["message"] = "$param FAILED";
+                }
             }
             break;
         default:

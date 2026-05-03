@@ -7,17 +7,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     include "../model/m_proses.php";
     $result = [];
     $data = new Proses_sql($connection);
-    @$param = $_POST["param"];
-    @$username = $_POST["username"];
-    @$password = md5($_POST["password"]);
+    @$param = $_POST["param"] ?? "";
+    $username = $_POST["username"] ?? "";
+    $passwordRaw = $_POST["password"] ?? "";
+    $password = md5($passwordRaw);
 
-    if (@$username == "" || @$password == "") {
+    if ($username === "" || $passwordRaw === "") {
         $response["value"] = "0";
         $response["message"] = "LOGIN FAILED ";
     } else {
-        @$user = $data->login($username, $password);
-        @$data_user = $user->fetch_object();
-        if (isset($data_user)) {
+        $user = $data->login($username, $password);
+        $data_user =
+            $user && $user->num_rows > 0 ? $user->fetch_object() : null;
+        if ($data_user) {
             $id_users = $data_user->id_users;
             $username = $data_user->username;
             $password = $data_user->password;

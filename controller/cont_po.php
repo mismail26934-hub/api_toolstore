@@ -132,14 +132,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
             } else {
-                @$delete_po = $data->delete_po(@$id_po, "", "", "", "");
-            }
-            if (@$delete_po) {
-                $response["value"] = "1";
-                $response["message"] = "$param SUCCESS";
-            } else {
-                $response["value"] = "0";
-                $response["message"] = "$param FAILED";
+                $delete_po = $data->delete_po(@$id_po, "", "", "", "");
+                if ($delete_po) {
+                    $response["value"] = "1";
+                    $response["message"] = "$param SUCCESS";
+                } else {
+                    $response["value"] = "0";
+                    $response["message"] = "$param FAILED";
+                }
             }
             break;
         default:

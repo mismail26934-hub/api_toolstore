@@ -33,7 +33,13 @@ class Proses_sql extends DbTable
 
     public function login($username = null, $password = null)
     {
-        if ($username != null && $password != null) {
+        $result = null;
+        if (
+            $username !== null &&
+            $username !== "" &&
+            $password !== null &&
+            $password !== ""
+        ) {
             $table = $this->tb_user;
             $select = $this->sql_select;
             $sql = $select;
@@ -46,7 +52,7 @@ class Proses_sql extends DbTable
                 $result = $query->get_result();
             }
         }
-        return @$result;
+        return $result;
     }
 
     // ------------- TABEL USER ----------------------------
@@ -66,17 +72,17 @@ class Proses_sql extends DbTable
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
-        $select = $this->sql_select;
-        $sql = $select;
-        $sql .= $table;
-        if (@$id_users != null || @$id_users != "") {
-            $sql .= " WHERE id_users = '$id_users' ";
-        } elseif (@$nama_user != null || @$nama_user != "") {
-            $sql .= " WHERE nama_user = '$nama_user' ";
-        } elseif (@$username != null || @$username != "") {
-            $sql .= " WHERE username = '$username' ";
+        $sup = $this->tb_superior;
+        $sql = "SELECT u.*, s.nama_superior AS nama_superior FROM $table u ";
+        $sql .= "LEFT JOIN $sup s ON u.superior_id = s.superior_id ";
+        if ((@$id_users ?? "") !== "") {
+            $sql .= " WHERE u.id_users = '$id_users' ";
+        } elseif ((@$nama_user ?? "") !== "") {
+            $sql .= " WHERE u.nama_user = '$nama_user' ";
+        } elseif ((@$username ?? "") !== "") {
+            $sql .= " WHERE u.username = '$username' ";
         } else {
-            $sql .= " ORDER BY nama_user ASC";
+            $sql .= " ORDER BY u.nama_user ASC";
         }
         ($query = $db->query($sql)) or die($db->error);
         return $query;
@@ -182,7 +188,7 @@ class Proses_sql extends DbTable
     // ------------- TABEL FORM ----------------------------
 
     public function data_form(
-        $id_from,
+        $id_form,
         $form_no,
         $form_serv_name,
         $form_check_by,
@@ -209,11 +215,11 @@ class Proses_sql extends DbTable
         $select = $this->sql_select;
         $sql = $select;
         $sql .= $table;
-        if (@$id_from != null || @$id_from != "") {
-            $sql .= " WHERE id_from = '$id_from' ";
-        } elseif (@$form_no != null || @$form_no != "") {
+        if ((@$id_form ?? "") !== "") {
+            $sql .= " WHERE id_form = '$id_form' ";
+        } elseif ((@$form_no ?? "") !== "") {
             $sql .= " WHERE form_no = '$form_no' ";
-        } elseif (@$form_serv_name != null || @$form_serv_name != "") {
+        } elseif ((@$form_serv_name ?? "") !== "") {
             $sql .= " WHERE form_serv_name = '$form_serv_name' ";
         } else {
             $sql .= " ORDER BY form_no ASC LIMIT $limit OFFSET $offset";
@@ -223,7 +229,7 @@ class Proses_sql extends DbTable
     }
 
     public function add_form(
-        $id_from,
+        $id_form,
         $form_no,
         $form_serv_name,
         $form_serv_comment,
@@ -249,7 +255,7 @@ class Proses_sql extends DbTable
         $sql = $insert;
         $sql .= $table;
         $sql .= " SET 
-            id_from = '$id_from',
+            id_form = '$id_form',
             form_no = '$form_no',
             form_serv_name = '$form_serv_name',
             form_check_by = '$form_check_by',
@@ -275,7 +281,7 @@ class Proses_sql extends DbTable
     }
 
     public function edit_form(
-        $id_from,
+        $id_form,
         $form_no,
         $form_serv_name,
         $form_serv_comment,
@@ -319,7 +325,7 @@ class Proses_sql extends DbTable
             form_date_shead_aprd = '$form_date_shead_aprd',
             form_milestone = '$form_milestone',
             form_status_order = '$form_status_order'
-            WHERE id_from = '$id_from'
+            WHERE id_form = '$id_form'
             ";
 
         ($query = $db->query($sql)) or die($db->error);
@@ -327,7 +333,7 @@ class Proses_sql extends DbTable
     }
 
     public function delete_form(
-        $id_from,
+        $id_form,
         $form_no,
         $form_serv_name,
         $form_serv_comment,
@@ -352,7 +358,7 @@ class Proses_sql extends DbTable
         $delete = $this->sql_delete;
         $sql = $delete;
         $sql .= $table;
-        $sql .= " WHERE id_from = '$id_from'
+        $sql .= " WHERE id_form = '$id_form'
             ";
 
         ($query = $db->query($sql)) or die($db->error);
@@ -381,9 +387,9 @@ class Proses_sql extends DbTable
         $select = $this->sql_select;
         $sql = $select;
         $sql .= $table;
-        if (@$id_form_detail != null || @$id_form_detail != "") {
+        if ((@$id_form_detail ?? "") !== "") {
             $sql .= " WHERE id_form_detail = '$id_form_detail' ";
-        } elseif (@$id_form != null || @$id_form != "") {
+        } elseif ((@$id_form ?? "") !== "") {
             $sql .= " WHERE id_form = '$id_form' ";
         } else {
             $sql .= " ORDER BY id_form ASC";
@@ -512,9 +518,9 @@ class Proses_sql extends DbTable
         $select = $this->sql_select;
         $sql = $select;
         $sql .= $table;
-        if (@$id_action_note != null || @$id_action_note != "") {
+        if ((@$id_action_note ?? "") !== "") {
             $sql .= " WHERE id_action_note = '$id_action_note' ";
-        } elseif (@$action_note_desc != null || @$action_note_desc != "") {
+        } elseif ((@$action_note_desc ?? "") !== "") {
             $sql .= " WHERE action_note_desc = '$action_note_desc' ";
         } else {
             $sql .= " ORDER BY id_action_note ASC";
@@ -604,11 +610,11 @@ class Proses_sql extends DbTable
         $select = $this->sql_select;
         $sql = $select;
         $sql .= $table;
-        if (@$id_po != null || @$id_po != "") {
+        if ((@$id_po ?? "") !== "") {
             $sql .= " WHERE id_po = '$id_po' ";
-        } elseif (@$id_form_detail != null || @$id_form_detail != "") {
+        } elseif ((@$id_form_detail ?? "") !== "") {
             $sql .= " WHERE id_form_detail = '$id_form_detail' ";
-        } elseif (@$po_no != null || @$po_no != "") {
+        } elseif ((@$po_no ?? "") !== "") {
             $sql .= " WHERE po_no = '$po_no' ";
         } else {
             $sql .= " ORDER BY id_form_detail ASC";
@@ -700,11 +706,11 @@ class Proses_sql extends DbTable
         $select = $this->sql_select;
         $sql = $select;
         $sql .= $table;
-        if (@$id_so != null || @$id_so != "") {
+        if ((@$id_so ?? "") !== "") {
             $sql .= " WHERE id_so = '$id_so' ";
-        } elseif (@$id_form_detail != null || @$id_form_detail != "") {
+        } elseif ((@$id_form_detail ?? "") !== "") {
             $sql .= " WHERE id_form_detail = '$id_form_detail' ";
-        } elseif (@$so != null || @$so != "") {
+        } elseif ((@$so ?? "") !== "") {
             $sql .= " WHERE so = '$so' ";
         } else {
             $sql .= " ORDER BY id_form_detail ASC";
@@ -804,9 +810,9 @@ class Proses_sql extends DbTable
         $select = $this->sql_select;
         $sql = $select;
         $sql .= $table;
-        if (@$superior_id != null || @$superior_id != "") {
+        if ((@$superior_id ?? "") !== "") {
             $sql .= " WHERE superior_id = '$superior_id' ";
-        } elseif (@$nama_superior != null || @$nama_superior != "") {
+        } elseif ((@$nama_superior ?? "") !== "") {
             $sql .= " WHERE nama_superior = '$nama_superior' ";
         } else {
             $sql .= " ORDER BY nama_superior ASC";
@@ -896,9 +902,9 @@ class Proses_sql extends DbTable
         $select = $this->sql_select;
         $sql = $select;
         $sql .= $table;
-        if (@$id_rcv_wh != null || @$id_rcv_wh != "") {
+        if ((@$id_rcv_wh ?? "") !== "") {
             $sql .= " WHERE id_rcv_wh = '$id_rcv_wh' ";
-        } elseif (@$id_form_detail != null || @$id_form_detail != "") {
+        } elseif ((@$id_form_detail ?? "") !== "") {
             $sql .= " WHERE id_form_detail = '$id_form_detail' ";
         } else {
             $sql .= " ORDER BY id_form_detail ASC";
@@ -988,9 +994,9 @@ class Proses_sql extends DbTable
         $select = $this->sql_select;
         $sql = $select;
         $sql .= $table;
-        if (@$id_rcv_tool != null || @$id_rcv_tool != "") {
+        if ((@$id_rcv_tool ?? "") !== "") {
             $sql .= " WHERE id_rcv_tool = '$id_rcv_tool' ";
-        } elseif (@$id_form_detail != null || @$id_form_detail != "") {
+        } elseif ((@$id_form_detail ?? "") !== "") {
             $sql .= " WHERE id_form_detail = '$id_form_detail' ";
         } else {
             $sql .= " ORDER BY id_form_detail ASC";
@@ -1068,8 +1074,12 @@ class Proses_sql extends DbTable
 
     function __destruct()
     {
-        $db = $this->mysqli->conn;
-        $db = $db->close();
+        if (
+            isset($this->mysqli->conn) &&
+            $this->mysqli->conn instanceof mysqli
+        ) {
+            $this->mysqli->conn->close();
+        }
     }
 }
 ?>

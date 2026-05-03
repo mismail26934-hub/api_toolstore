@@ -239,7 +239,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
             } else {
-                @$delete_form = $data->delete_form(
+                $delete_form = $data->delete_form(
                     @$id_form,
                     "",
                     "",
@@ -260,13 +260,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     "",
                     "",
                 );
-            }
-            if (@$delete_form) {
-                $response["value"] = "1";
-                $response["message"] = "$param SUCCESS";
-            } else {
-                $response["value"] = "0";
-                $response["message"] = "$param FAILED";
+                if ($delete_form) {
+                    $response["value"] = "1";
+                    $response["message"] = "$param SUCCESS";
+                } else {
+                    $response["value"] = "0";
+                    $response["message"] = "$param FAILED";
+                }
             }
             break;
         default:

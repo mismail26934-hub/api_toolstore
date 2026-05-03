@@ -1,4 +1,4 @@
-  <?php
+<?php
   $sql = [
       "user" => "root",
       "pass" => "",

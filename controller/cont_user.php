@@ -37,9 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 ? ""
                 : @$id_users,
             @$username,
+            "",
             @$nama_user,
-            "",
-            "",
             "",
             "",
             "",
@@ -66,6 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$level = $row_user->level;
                     @$status = $row_user->status;
                     @$superior_id = $row_user->superior_id;
+                    @$nama_superior = $row_user->nama_superior ?? "";
                 } else {
                     @$id_users = "";
                     @$username = "";
@@ -78,6 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$level = "";
                     @$status = "";
                     @$superior_id = "";
+                    @$nama_superior = "";
                 }
                 $b["id_users"] = $id_users;
                 $b["username"] = $username;
@@ -86,11 +87,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $b["foto"] = $foto;
                 $b["id_tu"] = $id_tu;
                 $b["no_telp"] = $no_telp;
-                $b["no_telp"] = $no_telp;
                 $b["token"] = $token;
                 $b["level"] = $level;
                 $b["status"] = $status;
                 $b["superior_id"] = $superior_id;
+                $b["nama_superior"] = $nama_superior;
 
                 array_push($result, $b);
             }
@@ -163,7 +164,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
             } else {
-                @$delete_user = $data->delete_user(
+                $delete_user = $data->delete_user(
                     @$id_users,
                     @$username,
                     @$password,
@@ -176,13 +177,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$status,
                     @$superior_id,
                 );
-            }
-            if (@$delete_user) {
-                $response["value"] = "1";
-                $response["message"] = "$param SUCCESS";
-            } else {
-                $response["value"] = "0";
-                $response["message"] = "$param FAILED";
+                if ($delete_user) {
+                    $response["value"] = "1";
+                    $response["message"] = "$param SUCCESS";
+                } else {
+                    $response["value"] = "0";
+                    $response["message"] = "$param FAILED";
+                }
             }
             break;
         default:

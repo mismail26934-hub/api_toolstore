@@ -9,6 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     $data = new Proses_sql($connection);
 
     @$param = $_POST["param"];
+    @$id_form = $_POST["id_form"];
     @$id_action_note = $_POST["id_action_note"];
     @$action_note_desc = $_POST["action_note_desc"];
     @$action_date_update = $_POST["action_date_update"];

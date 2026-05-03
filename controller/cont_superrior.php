@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             @$superior_id_cek = $row_superrior_cek->superior_id;
             @$nama_superior_cek = $row_superrior_cek->nama_superior;
             @$status_superior_cek = $row_superrior_cek->status_superior;
-        } elseif (@$param == @$view_data_superior) {
+        } elseif (@$param == @$view_data_superrior) {
             while (@$row_superrior = $data_superrior->fetch_object()) {
                 if (isset($row_superrior)) {
                     @$superior_id = $row_superrior->superior_id;
@@ -90,14 +90,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $response["value"] = "0";
                 $response["message"] = "FORM NUMBER DUPLICATE";
             } else {
-                @$add_superrrior = $data->add_superrior(
+                @$add_superrior = $data->add_superrior(
                     @$superior_id,
                     @$nama_superior,
                     @$status_superior,
                     @$user_id_input_superior,
                     @$date_input_superior,
                 );
-                if ($add_superrrior) {
+                if ($add_superrior) {
                     $response["value"] = "1";
                     $response["message"] = "$param SUCCESS";
                 } else {
@@ -138,20 +138,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $response["value"] = "0";
                 $response["message"] = "ERROR $param !";
             } else {
-                @$delete_superrior = $data->delete_superrior(
+                $delete_superrior = $data->delete_superrior(
                     @$superior_id,
                     "",
                     "",
                     "",
                     "",
                 );
-            }
-            if (@$delete_superrior) {
-                $response["value"] = "1";
-                $response["message"] = "$param SUCCESS";
-            } else {
-                $response["value"] = "0";
-                $response["message"] = "$param FAILED";
+                if ($delete_superrior) {
+                    $response["value"] = "1";
+                    $response["message"] = "$param SUCCESS";
+                } else {
+                    $response["value"] = "0";
+                    $response["message"] = "$param FAILED";
+                }
             }
             break;
         default:
