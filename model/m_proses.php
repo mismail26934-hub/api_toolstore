@@ -882,11 +882,6 @@ class Proses_sql extends DbTable
         return $query;
     }
 
-    function __destruct()
-    {
-        $db = $this->mysqli->conn;
-        $db = $db->close();
-    }
     // ------------- TABEL RCV WH ----------------------
 
     public function data_rcv_wh(
@@ -979,12 +974,6 @@ class Proses_sql extends DbTable
         return $query;
     }
 
-    function __destruct()
-    {
-        $db = $this->mysqli->conn;
-        $db = $db->close();
-    }
-}
     // ------------- TABEL RCV TOOL ----------------------
 
     public function data_rcv_tool(
@@ -1010,7 +999,7 @@ class Proses_sql extends DbTable
         return $query;
     }
 
-    public function add_rcv_wh(
+    public function add_rcv_tool(
         $id_rcv_tool,
         $id_form_detail,
         $rcv_tool_date,
