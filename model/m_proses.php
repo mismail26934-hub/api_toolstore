@@ -73,8 +73,9 @@ class Proses_sql extends DbTable
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
         $sup = $this->tb_superior;
-        $sql = "SELECT u.*, s.nama_superior AS nama_superior FROM $table u ";
+        $sql = "SELECT u.*, s.nama_superior AS nama_superior, sup_u.no_telp AS no_telp_superior FROM $table u ";
         $sql .= "LEFT JOIN $sup s ON u.superior_id = s.superior_id ";
+        $sql .= "LEFT JOIN $table sup_u ON sup_u.nama_user = s.nama_superior ";
         if ((@$id_users ?? "") !== "") {
             $sql .= " WHERE u.id_users = '$id_users' ";
         } elseif ((@$nama_user ?? "") !== "") {

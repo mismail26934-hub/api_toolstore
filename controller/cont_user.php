@@ -66,6 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$status = $row_user->status;
                     @$superior_id = $row_user->superior_id;
                     @$nama_superior = $row_user->nama_superior ?? "";
+                    @$no_telp_superior = $row_user->no_telp_superior ?? "";
                 } else {
                     @$id_users = "";
                     @$username = "";
@@ -79,6 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$status = "";
                     @$superior_id = "";
                     @$nama_superior = "";
+                    @$no_telp_superior = "";
                 }
                 $b["id_users"] = $id_users;
                 $b["username"] = $username;
@@ -92,6 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $b["status"] = $status;
                 $b["superior_id"] = $superior_id;
                 $b["nama_superior"] = $nama_superior;
+                $b["no_telp_superior"] = $no_telp_superior;
 
                 array_push($result, $b);
             }
