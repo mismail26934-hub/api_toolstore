@@ -106,6 +106,41 @@ class Proses_sql extends DbTable
         return $query;
     }
 
+    /**
+     * Jumlah baris user yang cocok dengan filter yang sama seperti data_user(),
+     * tanpa LIMIT/OFFSET (untuk pagination di cont_user.php).
+     */
+    public function count_user(
+        $id_users,
+        $username,
+        $nama_user,
+        $superior_id,
+        $search = null,
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_user;
+        $sup = $this->tb_superior;
+        $sql = "SELECT COUNT(*) AS cnt FROM $table u ";
+        $sql .= "LEFT JOIN $sup s ON u.superior_id = s.superior_id ";
+        $sql .= "LEFT JOIN $table sup_u ON sup_u.nama_user = s.nama_superior ";
+        $search_trim = trim((string) ($search ?? ""));
+        if ((@$id_users ?? "") !== "") {
+            $sql .= " WHERE u.id_users = '$id_users' ";
+        } elseif ($search_trim !== "") {
+            $escaped = $db->real_escape_string($search_trim);
+            $sql .=
+                " WHERE (u.username LIKE '%$escaped%' OR u.nama_user LIKE '%$escaped%' OR u.no_telp LIKE '%$escaped%' OR u.level LIKE '%$escaped%' OR IFNULL(u.status,'') LIKE '%$escaped%' OR CAST(u.id_users AS CHAR) LIKE '%$escaped%' OR IFNULL(s.nama_superior,'') LIKE '%$escaped%') ";
+        } elseif ((@$nama_user ?? "") !== "") {
+            $sql .= " WHERE u.nama_user = '$nama_user' ";
+        } elseif ((@$username ?? "") !== "") {
+            $sql .= " WHERE u.username = '$username' ";
+        } elseif ((@$superior_id ?? "") !== "") {
+            $sql .= " WHERE u.superior_id = '$superior_id' ";
+        }
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
     public function add_user(
         $id_users,
         $username,
@@ -240,6 +275,80 @@ class Proses_sql extends DbTable
 
     // ------------- TABEL FORM ----------------------------
 
+    /**
+     * WHERE clause for form list / count (exact id/no/serviceman or keyword search).
+     */
+    private function form_list_where_sql(
+        $db,
+        $id_form,
+        $form_no,
+        $form_serv_name,
+        $search,
+        $search_field,
+    ) {
+        if ((@$id_form ?? "") !== "") {
+            $id_esc = $db->real_escape_string($id_form);
+            return " WHERE id_form = '$id_esc' ";
+        }
+        if ((@$form_no ?? "") !== "") {
+            $no_esc = $db->real_escape_string($form_no);
+            return " WHERE form_no = '$no_esc' ";
+        }
+        if ((@$form_serv_name ?? "") !== "") {
+            $name_esc = $db->real_escape_string($form_serv_name);
+            return " WHERE form_serv_name = '$name_esc' ";
+        }
+
+        $search_trim = trim((string) ($search ?? ""));
+        if ($search_trim === "") {
+            return "";
+        }
+
+        $escaped = $db->real_escape_string($search_trim);
+        $like = "'%$escaped%'";
+        $field = strtolower(trim((string) ($search_field ?? "all")));
+        $fd = $this->tb_form_detail;
+        $so = $this->tb_so;
+        $po = $this->tb_po;
+
+        $detail_match = function ($predicate) use ($fd) {
+            return "EXISTS (SELECT 1 FROM $fd fd WHERE fd.id_form = tb_form.id_form AND ($predicate))";
+        };
+        $order_match =
+            "EXISTS (SELECT 1 FROM $fd fd " .
+            "LEFT JOIN $so s ON s.id_form_detail = fd.id_form_detail " .
+            "LEFT JOIN $po p ON p.id_form_detail = fd.id_form_detail " .
+            "WHERE fd.id_form = tb_form.id_form AND (IFNULL(s.so,'') LIKE $like OR IFNULL(s.note_so,'') LIKE $like OR IFNULL(p.po_no,'') LIKE $like))";
+
+        switch ($field) {
+            case "formno":
+            case "form_no":
+                return " WHERE form_no LIKE $like ";
+            case "serviceman":
+                return " WHERE form_serv_name LIKE $like ";
+            case "status":
+                return " WHERE form_serv_comment LIKE $like ";
+            case "idform":
+            case "id_form":
+            case "category":
+                return " WHERE CAST(id_form AS CHAR) LIKE $like ";
+            case "pngroup":
+            case "pn_group":
+                return " WHERE " . $detail_match("fd.pn_group LIKE $like") . " ";
+            case "pndesc":
+            case "pn_desc":
+                return " WHERE " . $detail_match("fd.pn_desc LIKE $like") . " ";
+            case "all":
+            default:
+                return
+                    " WHERE (form_no LIKE $like OR form_serv_name LIKE $like OR form_serv_comment LIKE $like " .
+                    "OR CAST(id_form AS CHAR) LIKE $like OR IFNULL(form_check_by,'') LIKE $like " .
+                    "OR IFNULL(form_milestone,'') LIKE $like OR " .
+                    $detail_match("fd.pn_group LIKE $like OR fd.pn_desc LIKE $like") .
+                    " OR $order_match) ";
+        }
+    }
+
     public function data_form(
         $id_form,
         $form_no,
@@ -262,21 +371,97 @@ class Proses_sql extends DbTable
         $form_status_order,
         $limit,
         $offset,
+        $search = null,
+        $search_field = "all",
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_form;
         $select = $this->sql_select;
         $sql = $select;
         $sql .= $table;
-        if ((@$id_form ?? "") !== "") {
-            $sql .= " WHERE id_form = '$id_form' ";
-        } elseif ((@$form_no ?? "") !== "") {
-            $sql .= " WHERE form_no = '$form_no' ";
-        } elseif ((@$form_serv_name ?? "") !== "") {
-            $sql .= " WHERE form_serv_name = '$form_serv_name' ";
-        } else {
-            $sql .= " ORDER BY form_no ASC LIMIT $limit OFFSET $offset";
+        $sql .= $this->form_list_where_sql(
+            $db,
+            $id_form,
+            $form_no,
+            $form_serv_name,
+            $search,
+            $search_field,
+        );
+        if ((@$id_form ?? "") === "" &&
+            (@$form_no ?? "") === "" &&
+            (@$form_serv_name ?? "") === "") {
+            $sql .= " ORDER BY form_no ASC";
+            if ($limit !== null && (int) $limit > 0) {
+                $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
+            }
         }
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    /**
+     * Jumlah baris form yang cocok dengan filter yang sama seperti data_form(),
+     * tanpa LIMIT/OFFSET (untuk pagination di cont_form.php).
+     */
+    public function count_form(
+        $id_form,
+        $form_no,
+        $form_serv_name,
+        $search = null,
+        $search_field = "all",
+    ) {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_form;
+        $sql = "SELECT COUNT(*) AS cnt FROM $table ";
+        $sql .= $this->form_list_where_sql(
+            $db,
+            $id_form,
+            $form_no,
+            $form_serv_name,
+            $search,
+            $search_field,
+        );
+        ($query = $db->query($sql)) or die($db->error);
+        return $query;
+    }
+
+    /**
+     * Agregat COUNT per kategori milestone (dashboard monitoring).
+     * Logika selaras dengan dashboard Flutter (draft + milestone aktif).
+     */
+    public function count_form_dashboard()
+    {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_form;
+        $norm =
+            "UPPER(TRIM(REPLACE(IFNULL(form_milestone,''), '.', '')))";
+        $mile = "UPPER(TRIM(IFNULL(form_milestone,'')))";
+        $sql =
+            "SELECT " .
+            "SUM(CASE WHEN TRIM(IFNULL(form_milestone,'')) = '' THEN 1 ELSE 0 END) AS draft, " .
+            "SUM(CASE WHEN $mile = 'CHECK BY TOOL STORE' THEN 1 ELSE 0 END) AS superior_approval, " .
+            "SUM(CASE WHEN $mile = 'SUPERIOR APPROVED' THEN 1 ELSE 0 END) AS service_admin, " .
+            "SUM(CASE WHEN $mile = 'REVIEWED BY SERVICE ADMIN' THEN 1 ELSE 0 END) AS dept_head, " .
+            "SUM(CASE WHEN $mile = 'APPROVED BY SERVICE DEPT. HEAD' THEN 1 ELSE 0 END) AS counter_ga, " .
+            "SUM(CASE WHEN $norm IN (" .
+            "'RECEIVED BY WH/GA'," .
+            "'PARTIAL RECEIVED BY WH/GA'," .
+            "'PARTIAL RECEIVED TOOL STORE'," .
+            "'PARTIAL RECEIVED BY TOOL STORE'" .
+            ") THEN 1 ELSE 0 END) AS tool_received_wh_ga, " .
+            "SUM(CASE WHEN TRIM(IFNULL(form_milestone,'')) = '' " .
+            "OR $mile IN (" .
+            "'CHECK BY TOOL STORE'," .
+            "'SUPERIOR APPROVED'," .
+            "'REVIEWED BY SERVICE ADMIN'," .
+            "'APPROVED BY SERVICE DEPT. HEAD'" .
+            ") OR $norm IN (" .
+            "'RECEIVED BY WH/GA'," .
+            "'PARTIAL RECEIVED BY WH/GA'," .
+            "'PARTIAL RECEIVED TOOL STORE'," .
+            "'PARTIAL RECEIVED BY TOOL STORE'" .
+            ") THEN 1 ELSE 0 END) AS notification_total " .
+            "FROM $table";
         ($query = $db->query($sql)) or die($db->error);
         return $query;
     }

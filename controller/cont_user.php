@@ -72,6 +72,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 @$password = md5(@$password_post);
             }
         } elseif (@$param == @$view_data_user) {
+            @$count_q = $data->count_user(
+                @$param == @$add_data_user || @$param == @$edit_data_user
+                    ? ""
+                    : @$id_users,
+                @$username,
+                @$nama_user,
+                @$superior_id,
+                @$search_user,
+            );
+            @$total_users = 0;
+            if (@$count_q) {
+                @$row_cnt = $count_q->fetch_object();
+                if (isset($row_cnt->cnt)) {
+                    @$total_users = (int) $row_cnt->cnt;
+                }
+            }
             while (@$row_user = $data_user->fetch_object()) {
                 if (isset($row_user)) {
                     @$id_users = $row_user->id_users;
@@ -227,6 +243,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
         default:
             break;
     }
-    echo json_encode($result);
+    if (@$param == @$view_data_user) {
+        echo json_encode(
+            [
+                "total" => isset($total_users) ? (int) $total_users : 0,
+                "data" => $result,
+            ],
+            JSON_UNESCAPED_UNICODE,
+        );
+    } else {
+        echo json_encode($result);
+    }
 }
 ?>

@@ -11,8 +11,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     @$param = trim((string) ($_POST["param"] ?? ""));
     @$id_form_detail =
         $_POST["id_form_detail"] ?? ($_POST["idFormDetail"] ?? "");
-    @$id_form =
-        $_POST["id_form"] ?? ($_POST["idFrom"] ?? ($_POST["idForm"] ?? ""));
+    @$id_form = trim(
+        (string) ($_POST["id_form"] ??
+            ($_POST["idFrom"] ?? ($_POST["idForm"] ?? ""))),
+    );
     @$form_comment = $_POST["form_comment"] ?? ($_POST["formComment"] ?? "");
     @$pn_group = $_POST["pn_group"] ?? ($_POST["pnGroup"] ?? "");
     @$pn_desc = $_POST["pn_desc"] ?? ($_POST["pnDesc"] ?? "");
@@ -24,10 +26,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     @$form_detail_milestone =
         $_POST["form_detail_milestone"] ??
         ($_POST["formDetailMilestone"] ?? "");
-    @$form_detail_date =
-        $_POST["form_detail_date"] ?? ($_POST["formDetailDate"] ?? "");
-    @$form_detail_user =
-        $_POST["form_detail_user"] ?? ($_POST["formDetailUser"] ?? "");
+    @$form_detail_date = trim(
+        (string) ($_POST["form_detail_date"] ??
+            ($_POST["formDetailDate"] ?? "")),
+    );
+    @$form_detail_user = trim(
+        (string) ($_POST["form_detail_user"] ??
+            ($_POST["formDetailUser"] ?? "")),
+    );
 
     @$add_data_form_detail = "ADD DATA TOOL";
     @$edit_data_form_detail = "EDIT DATA TOOL";
@@ -132,7 +138,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
 
     switch ($param) {
         case $add_data_form_detail:
+            if (@$id_form === "" || @$id_form === "0") {
+                $response["value"] = "0";
+                $response["message"] = "ADD DATA TOOL FAILED: id_form wajib diisi";
+            } elseif (
+                @$form_detail_date === "" ||
+                @$form_detail_date === "0000-00-00 00:00:00"
+            ) {
+                @$form_detail_date = date("Y-m-d H:i:s");
+            }
             if (
+                !isset($response) &&
+                (@$form_detail_user === "" || @$form_detail_user === "0")
+            ) {
+                $response["value"] = "0";
+                $response["message"] =
+                    "ADD DATA TOOL FAILED: form_detail_user wajib diisi";
+            }
+            if (
+                !isset($response) &&
                 isset($row_form_detail_cek) &&
                 @$id_form_detail == @$id_form_detail_cek &&
                 @$id_form == @$id_form_cek &&
@@ -140,7 +164,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             ) {
                 $response["value"] = "0";
                 $response["message"] = "FORM NUMBER DUPLICATE !";
-            } else {
+            } elseif (!isset($response)) {
                 @$add_form_detail = $data->add_form_detail(
                     @$id_form_detail,
                     @$id_form,

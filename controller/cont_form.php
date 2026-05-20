@@ -48,11 +48,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     @$form_date_shead_aprd = $_POST["form_date_shead_aprd"];
     @$form_milestone = $_POST["form_milestone"];
     @$form_status_order = $_POST["form_status_order"];
+    @$search_form = "";
+    if (isset($_POST["search"])) {
+        @$search_form = trim((string) $_POST["search"]);
+    } elseif (isset($_POST["keyword"])) {
+        @$search_form = trim((string) $_POST["keyword"]);
+    }
+    @$search_field_form = isset($_POST["search_field"])
+        ? trim((string) $_POST["search_field"])
+        : "all";
 
     @$add_data_form = "ADD DATA FORM";
     @$edit_data_form = "EDIT DATA FORM";
     @$view_data_form = "VIEW DATA FORM";
     @$delete_data_form = "DELETED DATA FORM";
+    @$dashboard_count_form = "DASHBOARD COUNT FORM";
+
+    if (@$param == @$dashboard_count_form) {
+        @$count_q = $data->count_form_dashboard();
+        $dashboard_counts = [
+            "draft" => 0,
+            "superior_approval" => 0,
+            "service_admin" => 0,
+            "dept_head" => 0,
+            "counter_ga" => 0,
+            "tool_received_wh_ga" => 0,
+            "notification_total" => 0,
+        ];
+        if (@$count_q) {
+            @$row_cnt = $count_q->fetch_object();
+            if (isset($row_cnt)) {
+                $dashboard_counts["draft"] = (int) $row_cnt->draft;
+                $dashboard_counts["superior_approval"] =
+                    (int) $row_cnt->superior_approval;
+                $dashboard_counts["service_admin"] =
+                    (int) $row_cnt->service_admin;
+                $dashboard_counts["dept_head"] = (int) $row_cnt->dept_head;
+                $dashboard_counts["counter_ga"] = (int) $row_cnt->counter_ga;
+                $dashboard_counts["tool_received_wh_ga"] =
+                    (int) $row_cnt->tool_received_wh_ga;
+                $dashboard_counts["notification_total"] =
+                    (int) $row_cnt->notification_total;
+            }
+        }
+        echo json_encode($dashboard_counts, JSON_UNESCAPED_UNICODE);
+        exit();
+    }
 
     if (
         @$param == @$add_data_form ||
@@ -81,8 +122,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             "",
             "",
             "",
-            @$limit,
-            @$offset,
+            @$param == @$view_data_form ? @$limit : null,
+            @$param == @$view_data_form ? @$offset : 0,
+            @$param == @$view_data_form ? @$search_form : null,
+            @$param == @$view_data_form ? @$search_field_form : "all",
         );
         if (@$param == @$add_data_form || @$param == @$edit_data_form) {
             @$row_form_cek = $data_form->fetch_object();
@@ -90,6 +133,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             @$form_no_cek = $row_form_cek->form_no;
             @$form_serv_name_cek = $row_form_cek->form_serv_name;
         } elseif (@$param == @$view_data_form) {
+            @$count_q = $data->count_form(
+                "",
+                "",
+                "",
+                @$search_form,
+                @$search_field_form,
+            );
+            @$total_forms = 0;
+            if (@$count_q) {
+                @$row_cnt = $count_q->fetch_object();
+                if (isset($row_cnt->cnt)) {
+                    @$total_forms = (int) $row_cnt->cnt;
+                }
+            }
             while (@$row_form = $data_form->fetch_object()) {
                 if (isset($row_form)) {
                     @$id_form = $row_form->id_form;
@@ -308,5 +365,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
         default:
             break;
     }
-    echo json_encode($result);
+    if (@$param == @$view_data_form) {
+        echo json_encode(
+            [
+                "total" => isset($total_forms) ? (int) $total_forms : 0,
+                "data" => $result,
+            ],
+            JSON_UNESCAPED_UNICODE,
+        );
+    } else {
+        echo json_encode($result);
+    }
 } ?> 
