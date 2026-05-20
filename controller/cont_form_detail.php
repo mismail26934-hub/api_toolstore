@@ -132,9 +132,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
 
     switch ($param) {
         case $add_data_form_detail:
-            if (isset($row_form_detail_cek)) {
+            if (
+                isset($row_form_detail_cek) &&
+                @$id_form_detail == @$id_form_detail_cek &&
+                @$id_form == @$id_form_cek &&
+                @$pn_group == @$pn_group_cek
+            ) {
                 $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE";
+                $response["message"] = "FORM NUMBER DUPLICATE !";
             } else {
                 @$add_form_detail = $data->add_form_detail(
                     @$id_form_detail,

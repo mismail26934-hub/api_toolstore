@@ -9,11 +9,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     $data = new Proses_sql($connection);
 
     @$param = $_POST["param"];
+    @$page = isset($_POST["page"]) ? (int) $_POST["page"] : 1;
+    if (@$page < 1) {
+        @$page = 1;
+    }
+    @$limit = isset($_POST["limit"]) ? (int) $_POST["limit"] : 20;
+    @$offset = ($page - 1) * $limit;
     @$id_users = $_POST["id_users"];
     @$id_user_post = $_POST["id_users"];
     @$username = $_POST["username"];
     @$password_post = $_POST["password"];
-    @$password = md5(@$password_post);
     @$nama_user = $_POST["nama_user"];
     @$foto = $_POST["foto"];
     @$id_tu = $_POST["id_tu"];
@@ -22,6 +27,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     @$level = $_POST["level"];
     @$status = $_POST["status"];
     @$superior_id = $_POST["superior_id"];
+    @$search_user = "";
+    if (isset($_POST["search"])) {
+        @$search_user = trim((string) $_POST["search"]);
+    } elseif (isset($_POST["keyword"])) {
+        @$search_user = trim((string) $_POST["keyword"]);
+    }
     @$add_data_user = "ADD DATA USER";
     @$edit_data_user = "EDIT DATA USER";
     @$view_data_user = "VIEW DATA USER";
@@ -46,11 +57,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             "",
             "",
             "",
+            @$param == @$view_data_user ? @$limit : null,
+            @$param == @$view_data_user ? @$offset : 0,
+            @$param == @$view_data_user ? @$search_user : "",
         );
         if (@$param == @$add_data_user || @$param == @$edit_data_user) {
             @$row_user_cek = $data_user->fetch_object();
             @$id_users_cek = $row_user_cek->id_users;
             @$username_cek = $row_user_cek->username;
+            @$password_cek = $row_user_cek->password;
+            if (@$password_post == @$password_cek) {
+                @$password = @$password_post;
+            } else {
+                @$password = md5(@$password_post);
+            }
         } elseif (@$param == @$view_data_user) {
             while (@$row_user = $data_user->fetch_object()) {
                 if (isset($row_user)) {

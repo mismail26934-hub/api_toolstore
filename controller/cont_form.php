@@ -114,6 +114,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$form_user_update = $row_form->form_user_update;
                     @$form_milestone = $row_form->form_milestone;
                     @$form_status_order = $row_form->form_status_order;
+                    @$superior_id = "";
+                    @$data_user = $data->data_user(
+                        "",
+                        "",
+                        "",
+                        @$form_serv_name,
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                    );
+                    @$row_user = $data_user->fetch_object();
+                    if (isset($row_user)) {
+                        @$superior_id = $row_user->superior_id;
+                    }
                 } else {
                     @$id_form = "";
                     @$form_no = "";
@@ -134,6 +152,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                     @$form_date_shead_aprd = "";
                     @$form_milestone = "";
                     @$form_status_order = "";
+                    @$superior_id = "";
                 }
                 $b["id_form"] = $id_form;
                 $b["form_no"] = $form_no;
@@ -154,6 +173,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 $b["form_date_shead_aprd"] = $form_date_shead_aprd;
                 $b["form_milestone"] = $form_milestone;
                 $b["form_status_order"] = $form_status_order;
+                $b["superior_id"] = $superior_id;
 
                 array_push($result, $b);
             }

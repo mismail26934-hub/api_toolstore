@@ -30,6 +30,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             $token = $data_user->token;
             $level = $data_user->level;
             $status = $data_user->status;
+            $superior_id = $data_user->superior_id;
+            $nama_superior = $data_user->nama_superior ?? "";
+
+            // Cek apakah nama_user terdaftar sebagai nama_superior di tb_superior.
+            $superior_from_nama = $data->data_superrior(
+                "",
+                $nama_user,
+                "",
+                "",
+                "",
+            );
+            if ($superior_from_nama && $superior_from_nama->num_rows > 0) {
+                $superior_data = $superior_from_nama->fetch_object();
+                if (!empty($superior_data->superior_id)) {
+                    $superior_id = $superior_data->superior_id;
+                }
+            }
 
             $response["value"] = "1";
             $response["message"] = "LOGIN SUCCESS";
@@ -43,6 +60,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             $response["token"] = $token;
             $response["level"] = $level;
             $response["status"] = $status;
+            $response["superior_id"] = $superior_id;
+            $response["nama_superior"] = $nama_superior;
         } else {
             $response["value"] = "0";
             $response["message"] = "LOGIN FAILED";

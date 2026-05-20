@@ -41,10 +41,10 @@ class Proses_sql extends DbTable
             $password !== ""
         ) {
             $table = $this->tb_user;
-            $select = $this->sql_select;
-            $sql = $select;
-            $sql .= $table;
-            $sql .= " WHERE username = ? AND password = ?";
+            $sup = $this->tb_superior;
+            $sql = "SELECT u.*, s.nama_superior AS nama_superior FROM $table u ";
+            $sql .= "LEFT JOIN $sup s ON u.superior_id = s.superior_id ";
+            $sql .= "WHERE u.username = ? AND u.password = ?";
             $db = $this->mysqli->conn;
             ($query = $db->prepare($sql)) or die($db->error);
             $query->bind_param("ss", $username, $password);
@@ -69,6 +69,9 @@ class Proses_sql extends DbTable
         $level,
         $status,
         $superior_id,
+        $limit = null,
+        $offset = 0,
+        $search = null,
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
@@ -76,14 +79,28 @@ class Proses_sql extends DbTable
         $sql = "SELECT u.*, s.nama_superior AS nama_superior, sup_u.no_telp AS no_telp_superior FROM $table u ";
         $sql .= "LEFT JOIN $sup s ON u.superior_id = s.superior_id ";
         $sql .= "LEFT JOIN $table sup_u ON sup_u.nama_user = s.nama_superior ";
+        $search_trim = trim((string) ($search ?? ""));
         if ((@$id_users ?? "") !== "") {
             $sql .= " WHERE u.id_users = '$id_users' ";
+        } elseif ($search_trim !== "") {
+            $escaped = $db->real_escape_string($search_trim);
+            $sql .=
+                " WHERE (u.username LIKE '%$escaped%' OR u.nama_user LIKE '%$escaped%' OR u.no_telp LIKE '%$escaped%' OR u.level LIKE '%$escaped%' OR IFNULL(u.status,'') LIKE '%$escaped%' OR CAST(u.id_users AS CHAR) LIKE '%$escaped%' OR IFNULL(s.nama_superior,'') LIKE '%$escaped%') ";
+            $sql .= " ORDER BY u.nama_user ASC";
+            if ($limit !== null && (int) $limit > 0) {
+                $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
+            }
         } elseif ((@$nama_user ?? "") !== "") {
             $sql .= " WHERE u.nama_user = '$nama_user' ";
         } elseif ((@$username ?? "") !== "") {
             $sql .= " WHERE u.username = '$username' ";
+        } elseif ((@$superior_id ?? "") !== "") {
+            $sql .= " WHERE u.superior_id = '$superior_id' ";
         } else {
             $sql .= " ORDER BY u.nama_user ASC";
+            if ($limit !== null && (int) $limit > 0) {
+                $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
+            }
         }
         ($query = $db->query($sql)) or die($db->error);
         return $query;
@@ -184,6 +201,41 @@ class Proses_sql extends DbTable
 
         ($query = $db->query($sql)) or die($db->error);
         return $query;
+    }
+
+    public function get_next_user_id()
+    {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_user;
+        $sql = "SELECT COALESCE(MAX(id_users), 0) + 1 AS next_id FROM $table";
+        ($query = $db->query($sql)) or die($db->error);
+        $row = $query->fetch_object();
+        return (int) ($row->next_id ?? 1);
+    }
+
+    public function user_id_exists($id_users)
+    {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_user;
+        $id_users = $db->real_escape_string((string) $id_users);
+        $sql = "SELECT id_users FROM $table WHERE id_users = '$id_users' LIMIT 1";
+        ($query = $db->query($sql)) or die($db->error);
+        return $query->num_rows > 0;
+    }
+
+    public function username_exists($username, $exclude_id_users = "")
+    {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_user;
+        $username = $db->real_escape_string((string) $username);
+        $sql = "SELECT id_users FROM $table WHERE username = '$username'";
+        if ((string) $exclude_id_users !== "") {
+            $exclude_id_users = $db->real_escape_string((string) $exclude_id_users);
+            $sql .= " AND id_users != '$exclude_id_users'";
+        }
+        $sql .= " LIMIT 1";
+        ($query = $db->query($sql)) or die($db->error);
+        return $query->num_rows > 0;
     }
 
     // ------------- TABEL FORM ----------------------------
@@ -887,6 +939,43 @@ class Proses_sql extends DbTable
 
         ($query = $db->query($sql)) or die($db->error);
         return $query;
+    }
+
+    public function get_next_superior_id()
+    {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_superior;
+        $sql = "SELECT COALESCE(MAX(superior_id), 0) + 1 AS next_id FROM $table";
+        ($query = $db->query($sql)) or die($db->error);
+        $row = $query->fetch_object();
+        return (int) ($row->next_id ?? 1);
+    }
+
+    public function superior_id_exists($superior_id)
+    {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_superior;
+        $superior_id = $db->real_escape_string((string) $superior_id);
+        $sql = "SELECT superior_id FROM $table WHERE superior_id = '$superior_id' LIMIT 1";
+        ($query = $db->query($sql)) or die($db->error);
+        return $query->num_rows > 0;
+    }
+
+    public function nama_superior_exists($nama_superior, $exclude_superior_id = "")
+    {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_superior;
+        $nama_superior = $db->real_escape_string((string) $nama_superior);
+        $sql = "SELECT superior_id FROM $table WHERE nama_superior = '$nama_superior'";
+        if ((string) $exclude_superior_id !== "") {
+            $exclude_superior_id = $db->real_escape_string(
+                (string) $exclude_superior_id,
+            );
+            $sql .= " AND superior_id != '$exclude_superior_id'";
+        }
+        $sql .= " LIMIT 1";
+        ($query = $db->query($sql)) or die($db->error);
+        return $query->num_rows > 0;
     }
 
     // ------------- TABEL RCV WH ----------------------
