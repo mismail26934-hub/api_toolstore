@@ -4,10 +4,8 @@ if (
     isset($_POST["param"]) &&
     $_POST["param"] === "UPLOAD DATA SUPERRIOR"
 ) {
-    require_once "../conn/conn.php";
-    require_once "../conn/api_auth.php";
-    require_once "../model/dbs.php";
-    require_once "../lib/SpreadsheetReader.php";
+    require_once __DIR__ . "/../conn/api_bootstrap.php";
+    require_once __DIR__ . "/../lib/SpreadsheetReader.php";
 
     header("Content-Type: application/json; charset=utf-8");
 
@@ -57,11 +55,9 @@ if (
         exit();
     }
 
-    $connection = new Dbs($host, $user, $pass, $db);
-    include "../model/m_proses.php";
-    $data = new Proses_sql($connection);
-    api_guard($data);
-    $db = $connection->conn;
+    $boot = api_bootstrap_full();
+    $data = $boot["data"];
+    $db = $boot["connection"]->conn;
 
     $defaultUserId = trim((string) ($_POST["user_id_input_superior"] ?? ""));
     $defaultDate = trim((string) ($_POST["date_input_superior"] ?? ""));

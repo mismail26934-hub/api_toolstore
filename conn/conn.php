@@ -54,3 +54,22 @@ $user = $sql["user"];
 $pass = $sql["pass"];
 $db = $sql["db"];
 $host = $sql["host"];
+
+$GLOBALS["API_DB_CONFIG"] = [
+    "host" => $host,
+    "user" => $user,
+    "pass" => $pass,
+    "db" => $db,
+];
+
+if (!function_exists("db_connection_config")) {
+    /**
+     * Kredensial DB untuk dipakai dari bootstrap (scope require aman).
+     *
+     * @return array{host: string, user: string, pass: string, db: string}
+     */
+    function db_connection_config(): array
+    {
+        return $GLOBALS["API_DB_CONFIG"];
+    }
+}

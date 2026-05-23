@@ -48,7 +48,7 @@ function password_normalize_for_storage(string $value): string
         $prefix === "$2y$" ||
         $prefix === "$2a$" ||
         $prefix === "$2b$" ||
-        substr($value, 0, 8) === "$argon2"
+        str_starts_with($value, '$argon2')
     ) {
         return $value;
     }

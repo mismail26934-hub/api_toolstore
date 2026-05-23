@@ -1,179 +1,177 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
-    require_once "../conn/conn.php";
-    require_once "../conn/api_auth.php";
-    require_once "../model/dbs.php";
 
-    $connection = new Dbs($host, $user, $pass, $db);
-    include "../model/m_proses.php";
-    $result = [];
-    $data = new Proses_sql($connection);
-    api_guard($data);
-    // ----------------------------------------------
-    //STATUS :
-    // 1.REQUEST SUPERIOR APPROVAL
-    // 2.CHECK BY TOOL STORE
-    // 3.REVIEW SERVICE ADMIN
-    // 4.WAIT APPROVAL SERVICE DEPT. HEAD
-    // 5.WAIT ORDER BY COUNTER
-    // 6.WAIT ORDER BY GA
-    // 7.ORDER DONE
-    // 8.RECEIVED WH/GA
-    // 9.RECEIVED TOOL STORE
-    // 10.COMPLETED
-    // 11.REJECTED
-    // ----------------------------------------------
-    @$param = $_POST["param"];
-    @$superior_id = $_POST["superior_id"];
-    @$nama_superior = $_POST["nama_superior"];
-    @$status_superior = $_POST["status_superior"];
-    @$user_id_input_superior = $_POST["user_id_input_superior"];
-    @$date_input_superior = $_POST["date_input_superior"];
+require_once __DIR__ . "/../conn/api_bootstrap.php";
+require_once __DIR__ . "/../conn/api_crud.php";
 
-    @$add_data_superrior = "ADD DATA SUPERRIOR";
-    @$edit_data_superrior = "EDIT DATA SUPERRIOR";
-    @$view_data_superrior = "VIEW DATA SUPERRIOR";
-    @$delete_data_superrior = "DELETED DATA SUPERRIOR";
+if (!api_is_post_with_param()) {
+    return;
+}
 
-    if (
-        @$param == @$add_data_superrior ||
-        @$param == @$edit_data_superrior ||
-        @$param == @$view_data_superrior
-    ) {
-        @$data_superrior = $data->data_superrior(
-            @$param == @$add_data_superrior || @$param == @$edit_data_superrior
-                ? ""
-                : @$superior_id,
-            @$nama_superior,
-            @$status_superior,
-            "",
-            "",
-            "",
-            "",
-        );
-        if (
-            @$param == @$add_data_superrior ||
-            @$param == @$edit_data_superrior
+const SUPERIOR_PARAM_ADD = "ADD DATA SUPERRIOR";
+const SUPERIOR_PARAM_EDIT = "EDIT DATA SUPERRIOR";
+const SUPERIOR_PARAM_VIEW = "VIEW DATA SUPERRIOR";
+const SUPERIOR_PARAM_DELETE = "DELETED DATA SUPERRIOR";
+
+$result = [];
+$data = api_bootstrap_data();
+$param = api_post_param();
+
+$superior_id = $_POST["superior_id"] ?? null;
+$nama_superior = $_POST["nama_superior"] ?? null;
+$status_superior = $_POST["status_superior"] ?? null;
+$user_id_input_superior = $_POST["user_id_input_superior"] ?? null;
+$date_input_superior = $_POST["date_input_superior"] ?? null;
+
+$row_superrior_cek = null;
+$superior_id_cek = null;
+$nama_superior_cek = null;
+
+if (
+    $param === SUPERIOR_PARAM_ADD ||
+    $param === SUPERIOR_PARAM_EDIT ||
+    $param === SUPERIOR_PARAM_VIEW
+) {
+    $data_superrior = $data->data_superrior(
+        $param === SUPERIOR_PARAM_ADD || $param === SUPERIOR_PARAM_EDIT
+            ? ""
+            : $superior_id,
+        $nama_superior,
+        $status_superior,
+        "",
+        "",
+    );
+
+    if ($param === SUPERIOR_PARAM_ADD || $param === SUPERIOR_PARAM_EDIT) {
+        $row_superrior_cek = $data_superrior->fetch_object();
+        if ($row_superrior_cek !== null) {
+            $superior_id_cek = $row_superrior_cek->superior_id;
+            $nama_superior_cek = $row_superrior_cek->nama_superior;
+        }
+    } elseif ($param === SUPERIOR_PARAM_VIEW) {
+        foreach (
+            api_mysqli_fetch_all_objects($data_superrior)
+            as $row_superrior
         ) {
-            @$row_superrior_cek = $data_superrior->fetch_object();
-            @$superior_id_cek = $row_superrior_cek->superior_id;
-            @$nama_superior_cek = $row_superrior_cek->nama_superior;
-            @$status_superior_cek = $row_superrior_cek->status_superior;
-        } elseif (@$param == @$view_data_superrior) {
-            while (@$row_superrior = $data_superrior->fetch_object()) {
-                if (isset($row_superrior)) {
-                    @$superior_id = $row_superrior->superior_id;
-                    @$nama_superior = $row_superrior->nama_superior;
-                    @$status_superior = $row_superrior->status_superior;
-                    @$user_id_input_superior =
-                        $row_superrior->user_id_input_superior;
-                    @$date_input_superior = $row_superrior->date_input_superior;
-                } else {
-                    @$superior_id = "";
-                    @$nama_superior = "";
-                    @$status_superior = "";
-                    @$user_id_input_superior = "";
-                    @$date_input_superior = "";
-                }
-                $b["superior_id"] = $superior_id;
-                $b["nama_superior"] = $nama_superior;
-                $b["status_superior"] = $status_superior;
-                $b["user_id_input_superior"] = $user_id_input_superior;
-                $b["date_input_superior"] = $date_input_superior;
-
-                array_push($result, $b);
-            }
+            $result[] = cont_superior_format_row($row_superrior);
         }
     }
+}
 
+$response = cont_superior_handle_mutation(
+    $data,
+    $param,
+    $row_superrior_cek,
+    $superior_id,
+    $superior_id_cek,
+    $nama_superior,
+    $nama_superior_cek,
+    $status_superior,
+    $user_id_input_superior,
+    $date_input_superior,
+);
+
+api_crud_push_mutation(
+    $result,
+    $param,
+    $response,
+    SUPERIOR_PARAM_ADD,
+    SUPERIOR_PARAM_EDIT,
+    SUPERIOR_PARAM_DELETE,
+);
+
+echo json_encode($result);
+
+/**
+ * @return array<string, mixed>
+ */
+function cont_superior_format_row(?object $row): array
+{
+    if ($row === null) {
+        return [
+            "superior_id" => "",
+            "nama_superior" => "",
+            "status_superior" => "",
+            "user_id_input_superior" => "",
+            "date_input_superior" => "",
+        ];
+    }
+
+    return [
+        "superior_id" => $row->superior_id,
+        "nama_superior" => $row->nama_superior,
+        "status_superior" => $row->status_superior,
+        "user_id_input_superior" => $row->user_id_input_superior,
+        "date_input_superior" => $row->date_input_superior,
+    ];
+}
+
+/**
+ * @return array{value: string, message: string}
+ */
+function cont_superior_handle_mutation(
+    Proses_sql $data,
+    string $param,
+    ?object $row_superrior_cek,
+    $superior_id,
+    $superior_id_cek,
+    $nama_superior,
+    $nama_superior_cek,
+    $status_superior,
+    $user_id_input_superior,
+    $date_input_superior,
+): array {
     switch ($param) {
-        case $add_data_superrior:
-            if (isset($row_superrior_cek)) {
-                $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE";
-            } else {
-                @$add_superrior = $data->add_superrior(
-                    @$superior_id,
-                    @$nama_superior,
-                    @$status_superior,
-                    @$user_id_input_superior,
-                    @$date_input_superior,
-                );
-                if ($add_superrior) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param  FAILED";
-                }
+        case SUPERIOR_PARAM_ADD:
+            if ($row_superrior_cek !== null) {
+                return api_crud_fail("FORM NUMBER DUPLICATE");
             }
-            break;
-        case $edit_data_superrior:
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->add_superrior(
+                    $superior_id,
+                    $nama_superior,
+                    $status_superior,
+                    $user_id_input_superior,
+                    $date_input_superior,
+                ),
+                " FAILED",
+            );
+
+        case SUPERIOR_PARAM_EDIT:
             if (
-                @$superior_id != @$superior_id_cek &&
+                $superior_id != $superior_id_cek &&
                 $nama_superior == $nama_superior_cek
             ) {
-                $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE !";
-            } elseif (@$superior_id == null || @$superior_id == "") {
-                $response["value"] = "0";
-                $response["message"] = "ERROR $param !";
-            } else {
-                @$edit_superrior = $data->edit_superrior(
-                    @$superior_id,
-                    @$nama_superior,
-                    @$status_superior,
-                    @$user_id_input_superior,
-                    @$date_input_superior,
-                );
-                if ($edit_superrior) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param FAILED";
-                }
+                return api_crud_fail("FORM NUMBER DUPLICATE !");
             }
-            break;
-        case @$delete_data_superrior:
-            if (@$superior_id == null || @$superior_id == "") {
-                $response["value"] = "0";
-                $response["message"] = "ERROR $param !";
-            } else {
-                $delete_superrior = $data->delete_superrior(
-                    @$superior_id,
-                    "",
-                    "",
-                    "",
-                    "",
-                );
-                if ($delete_superrior) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param FAILED";
-                }
-            }
-            break;
-        default:
-            $response["value"] = "2";
-            $response["message"] = "$param DATA FAILED";
-            break;
-    }
 
-    switch ($param) {
-        case $add_data_superrior:
-            array_push($result, $response);
-            break;
-        case $edit_data_superrior:
-            array_push($result, $response);
-            break;
-        case $delete_data_superrior:
-            array_push($result, $response);
-            break;
+            if ($superior_id === null || $superior_id === "") {
+                return api_crud_fail("ERROR $param !");
+            }
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->edit_superrior(
+                    $superior_id,
+                    $nama_superior,
+                    $status_superior,
+                    $user_id_input_superior,
+                    $date_input_superior,
+                ),
+            );
+
+        case SUPERIOR_PARAM_DELETE:
+            if ($superior_id === null || $superior_id === "") {
+                return api_crud_fail("ERROR $param !");
+            }
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->delete_superrior($superior_id, "", "", "", ""),
+            );
+
         default:
-            break;
+            return api_crud_unknown_param($param);
     }
-    echo json_encode($result);
-} ?> 
+}

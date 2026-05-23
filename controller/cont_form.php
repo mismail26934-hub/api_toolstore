@@ -1,381 +1,395 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
-    require_once "../conn/conn.php";
-    require_once "../conn/api_auth.php";
-    require_once "../model/dbs.php";
 
-    $connection = new Dbs($host, $user, $pass, $db);
-    include "../model/m_proses.php";
-    $result = [];
-    $data = new Proses_sql($connection);
-    api_guard($data);
-    // ----------------------------------------------
-    //STATUS :
-    // 1.REQUEST SUPERIOR APPROVAL
-    // 2.CHECK BY TOOL STORE
-    // 3.REVIEW SERVICE ADMIN
-    // 4.WAIT APPROVAL SERVICE DEPT. HEAD
-    // 5.WAIT ORDER BY COUNTER
-    // 6.WAIT ORDER BY GA
-    // 7.ORDER DONE
-    // 8.RECEIVED WH/GA
-    // 9.RECEIVED TOOL STORE
-    // 10.COMPLETED
-    // 11.REJECTED
-    // ----------------------------------------------
-    @$param = $_POST["param"];
-    @$page = isset($_POST["page"]) ? (int) $_POST["page"] : 1;
-    if (@$page < 1) {
-        @$page = 1;
+require_once __DIR__ . "/../conn/api_bootstrap.php";
+require_once __DIR__ . "/../conn/api_crud.php";
+
+if (!api_is_post_with_param()) {
+    return;
+}
+
+const FORM_PARAM_ADD = "ADD DATA FORM";
+const FORM_PARAM_EDIT = "EDIT DATA FORM";
+const FORM_PARAM_VIEW = "VIEW DATA FORM";
+const FORM_PARAM_DELETE = "DELETED DATA FORM";
+const FORM_PARAM_DASHBOARD = "DASHBOARD COUNT FORM";
+
+$result = [];
+$data = api_bootstrap_data();
+
+$param = api_post_param();
+$pagination = api_pagination_from_post(20);
+$limit = $pagination["limit"];
+$offset = $pagination["offset"];
+$search_form = api_search_from_post();
+$search_field_form = isset($_POST["search_field"])
+    ? trim((string) $_POST["search_field"])
+    : "all";
+
+$id_form = $_POST["id_form"] ?? null;
+$form_no = $_POST["form_no"] ?? null;
+$form_serv_name = $_POST["form_serv_name"] ?? null;
+$form_check_by = $_POST["form_check_by"] ?? null;
+$form_date_check_by = $_POST["form_date_check_by"] ?? null;
+$form_date_serv_name = $_POST["form_date_serv_name"] ?? null;
+$form_serv_comment = $_POST["form_serv_comment"] ?? null;
+$form_superior_aprd = $_POST["form_superior_aprd"] ?? null;
+$form_superior_comment = $_POST["form_superior_comment"] ?? null;
+$form_sadmin_comment = $_POST["form_sadmin_comment"] ?? null;
+$form_shead_aprd = $_POST["form_shead_aprd"] ?? null;
+$form_shead_comment = $_POST["form_shead_comment"] ?? null;
+$from_date_update = $_POST["from_date_update"] ?? null;
+$form_user_update = $_POST["form_user_update"] ?? null;
+$form_date_superior_aprd = $_POST["form_date_superior_aprd"] ?? null;
+$form_date_sadmin_comment = $_POST["form_date_sadmin_comment"] ?? null;
+$form_date_shead_aprd = $_POST["form_date_shead_aprd"] ?? null;
+$form_milestone = $_POST["form_milestone"] ?? null;
+$form_status_order = $_POST["form_status_order"] ?? null;
+
+if ($param === FORM_PARAM_DASHBOARD) {
+    cont_form_emit_dashboard($data);
+    return;
+}
+
+$row_form_cek = null;
+$id_form_cek = null;
+$form_no_cek = null;
+$form_serv_name_cek = null;
+$total_forms = 0;
+
+$filter_id_form = cont_form_filter_value($id_form);
+$filter_form_no = cont_form_filter_value($form_no);
+$filter_serv_name = cont_form_filter_value($form_serv_name);
+
+if ($param === FORM_PARAM_ADD || $param === FORM_PARAM_EDIT) {
+    $data_form = $data->data_form(
+        "",
+        $filter_form_no,
+        $filter_serv_name,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null,
+        0,
+        null,
+        "all",
+    );
+    $row_form_cek = $data_form->fetch_object();
+    if ($row_form_cek !== null) {
+        $id_form_cek = $row_form_cek->id_form;
+        $form_no_cek = $row_form_cek->form_no;
+        $form_serv_name_cek = $row_form_cek->form_serv_name;
     }
-    @$limit = isset($_POST["limit"]) ? (int) $_POST["limit"] : 20;
-    @$offset = ($page - 1) * $limit;
+} elseif ($param === FORM_PARAM_VIEW) {
+    $total_forms = api_crud_count_from_query(
+        $data->count_form(
+            $filter_id_form,
+            $filter_form_no,
+            $filter_serv_name,
+            $search_form,
+            $search_field_form,
+        ),
+    );
 
-    @$id_form = $_POST["id_form"];
-    @$form_no = $_POST["form_no"];
-    @$form_serv_name = $_POST["form_serv_name"];
-    @$form_check_by = $_POST["form_check_by"];
-    @$form_date_check_by = $_POST["form_date_check_by"];
-    @$form_date_serv_name = $_POST["form_date_serv_name"];
-    @$form_serv_comment = $_POST["form_serv_comment"];
-    @$form_superior_aprd = $_POST["form_superior_aprd"];
-    @$form_superior_comment = $_POST["form_superior_comment"];
-    @$form_sadmin_comment = $_POST["form_sadmin_comment"];
-    @$form_shead_aprd = $_POST["form_shead_aprd"];
-    @$form_shead_comment = $_POST["form_shead_comment"];
-    @$from_date_update = $_POST["from_date_update"];
-    @$form_user_update = $_POST["form_user_update"];
-    @$form_date_superior_aprd = $_POST["form_date_superior_aprd"];
-    @$form_date_sadmin_comment = $_POST["form_date_sadmin_comment"];
-    @$form_date_shead_aprd = $_POST["form_date_shead_aprd"];
-    @$form_milestone = $_POST["form_milestone"];
-    @$form_status_order = $_POST["form_status_order"];
-    @$search_form = "";
-    if (isset($_POST["search"])) {
-        @$search_form = trim((string) $_POST["search"]);
-    } elseif (isset($_POST["keyword"])) {
-        @$search_form = trim((string) $_POST["keyword"]);
+    $form_rows = $data->fetch_form_list_rows(
+        $filter_id_form,
+        $filter_form_no,
+        $filter_serv_name,
+        $limit,
+        $offset,
+        $search_form,
+        $search_field_form,
+    );
+
+    foreach ($form_rows as $row_form) {
+        $result[] = cont_form_format_row($data, $row_form);
     }
-    @$search_field_form = isset($_POST["search_field"])
-        ? trim((string) $_POST["search_field"])
-        : "all";
+}
 
-    @$add_data_form = "ADD DATA FORM";
-    @$edit_data_form = "EDIT DATA FORM";
-    @$view_data_form = "VIEW DATA FORM";
-    @$delete_data_form = "DELETED DATA FORM";
-    @$dashboard_count_form = "DASHBOARD COUNT FORM";
+$response = cont_form_handle_mutation(
+    $data,
+    $param,
+    $row_form_cek,
+    $id_form,
+    $id_form_cek,
+    $form_no,
+    $form_no_cek,
+    $form_serv_name,
+    $form_serv_comment,
+    $form_date_serv_name,
+    $form_check_by,
+    $form_date_check_by,
+    $form_superior_aprd,
+    $form_superior_comment,
+    $form_date_superior_aprd,
+    $form_sadmin_comment,
+    $form_date_sadmin_comment,
+    $form_shead_aprd,
+    $form_shead_comment,
+    $form_milestone,
+    $form_status_order,
+    $form_date_shead_aprd,
+    $from_date_update,
+    $form_user_update,
+);
 
-    if (@$param == @$dashboard_count_form) {
-        @$count_q = $data->count_form_dashboard();
-        $dashboard_counts = [
-            "draft" => 0,
-            "superior_approval" => 0,
-            "service_admin" => 0,
-            "dept_head" => 0,
-            "counter_ga" => 0,
-            "tool_received_wh_ga" => 0,
-            "notification_total" => 0,
+api_crud_push_mutation(
+    $result,
+    $param,
+    $response,
+    FORM_PARAM_ADD,
+    FORM_PARAM_EDIT,
+    FORM_PARAM_DELETE,
+);
+
+api_crud_emit($param, FORM_PARAM_VIEW, $result, $total_forms);
+
+/** Normalisasi filter list: null / spasi → kosong (hindari WHERE salah). */
+function cont_form_filter_value($value): string
+{
+    if ($value === null) {
+        return "";
+    }
+
+    return trim((string) $value);
+}
+
+function cont_form_emit_dashboard(Proses_sql $data): void
+{
+    $dashboard_counts = [
+        "draft" => 0,
+        "superior_approval" => 0,
+        "service_admin" => 0,
+        "dept_head" => 0,
+        "counter_ga" => 0,
+        "tool_received_wh_ga" => 0,
+        "notification_total" => 0,
+    ];
+
+    $count_q = $data->count_form_dashboard();
+    if ($count_q) {
+        $row_cnt = $count_q->fetch_object();
+        if ($row_cnt !== null) {
+            $dashboard_counts["draft"] = (int) $row_cnt->draft;
+            $dashboard_counts["superior_approval"] =
+                (int) $row_cnt->superior_approval;
+            $dashboard_counts["service_admin"] = (int) $row_cnt->service_admin;
+            $dashboard_counts["dept_head"] = (int) $row_cnt->dept_head;
+            $dashboard_counts["counter_ga"] = (int) $row_cnt->counter_ga;
+            $dashboard_counts["tool_received_wh_ga"] =
+                (int) $row_cnt->tool_received_wh_ga;
+            $dashboard_counts["notification_total"] =
+                (int) $row_cnt->notification_total;
+        }
+    }
+
+    echo json_encode($dashboard_counts, JSON_UNESCAPED_UNICODE);
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function cont_form_format_row(Proses_sql $data, ?object $row_form): array
+{
+    if ($row_form === null) {
+        return [
+            "id_form" => "",
+            "form_no" => "",
+            "form_serv_name" => "",
+            "form_check_by" => "",
+            "form_date_serv_name" => "",
+            "form_serv_comment" => "",
+            "form_superior_aprd" => "",
+            "form_superior_comment" => "",
+            "form_sadmin_comment" => "",
+            "form_shead_aprd" => "",
+            "form_shead_comment" => "",
+            "form_date_check_by" => "",
+            "from_date_update" => "",
+            "form_user_update" => "",
+            "form_date_superior_aprd" => "",
+            "form_date_sadmin_comment" => "",
+            "form_date_shead_aprd" => "",
+            "form_milestone" => "",
+            "form_status_order" => "",
+            "superior_id" => "",
         ];
-        if (@$count_q) {
-            @$row_cnt = $count_q->fetch_object();
-            if (isset($row_cnt)) {
-                $dashboard_counts["draft"] = (int) $row_cnt->draft;
-                $dashboard_counts["superior_approval"] =
-                    (int) $row_cnt->superior_approval;
-                $dashboard_counts["service_admin"] =
-                    (int) $row_cnt->service_admin;
-                $dashboard_counts["dept_head"] = (int) $row_cnt->dept_head;
-                $dashboard_counts["counter_ga"] = (int) $row_cnt->counter_ga;
-                $dashboard_counts["tool_received_wh_ga"] =
-                    (int) $row_cnt->tool_received_wh_ga;
-                $dashboard_counts["notification_total"] =
-                    (int) $row_cnt->notification_total;
-            }
-        }
-        echo json_encode($dashboard_counts, JSON_UNESCAPED_UNICODE);
-        exit();
     }
 
-    if (
-        @$param == @$add_data_form ||
-        @$param == @$edit_data_form ||
-        @$param == @$view_data_form
-    ) {
-        @$data_form = $data->data_form(
-            @$param == @$add_data_form || @$param == @$edit_data_form
-                ? ""
-                : @$id_form,
-            @$form_no,
-            @$form_serv_name,
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            @$param == @$view_data_form ? @$limit : null,
-            @$param == @$view_data_form ? @$offset : 0,
-            @$param == @$view_data_form ? @$search_form : null,
-            @$param == @$view_data_form ? @$search_field_form : "all",
-        );
-        if (@$param == @$add_data_form || @$param == @$edit_data_form) {
-            @$row_form_cek = $data_form->fetch_object();
-            @$id_form_cek = $row_form_cek->id_form;
-            @$form_no_cek = $row_form_cek->form_no;
-            @$form_serv_name_cek = $row_form_cek->form_serv_name;
-        } elseif (@$param == @$view_data_form) {
-            @$count_q = $data->count_form(
-                "",
-                "",
-                "",
-                @$search_form,
-                @$search_field_form,
+    $superior_id = "";
+    $data_user = $data->data_user(
+        "",
+        "",
+        "",
+        $row_form->form_serv_name,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+    );
+    $row_user = $data_user->fetch_object();
+    if ($row_user !== null) {
+        $superior_id = $row_user->superior_id;
+    }
+
+    return [
+        "id_form" => $row_form->id_form,
+        "form_no" => $row_form->form_no,
+        "form_serv_name" => $row_form->form_serv_name,
+        "form_check_by" => $row_form->form_check_by,
+        "form_date_serv_name" => $row_form->form_date_serv_name,
+        "form_serv_comment" => $row_form->form_serv_comment,
+        "form_superior_aprd" => $row_form->form_superior_aprd,
+        "form_superior_comment" => $row_form->form_superior_comment,
+        "form_sadmin_comment" => $row_form->form_sadmin_comment,
+        "form_shead_aprd" => $row_form->form_shead_aprd,
+        "form_shead_comment" => $row_form->form_shead_comment,
+        "form_date_check_by" => $row_form->form_date_check_by,
+        "from_date_update" => $row_form->from_date_update,
+        "form_user_update" => $row_form->form_user_update,
+        "form_date_superior_aprd" => $row_form->form_date_superior_aprd,
+        "form_date_sadmin_comment" => $row_form->form_date_sadmin_comment,
+        "form_date_shead_aprd" => $row_form->form_date_shead_aprd,
+        "form_milestone" => $row_form->form_milestone,
+        "form_status_order" => $row_form->form_status_order,
+        "superior_id" => $superior_id,
+    ];
+}
+
+/**
+ * @return array{value: string, message: string}
+ */
+function cont_form_handle_mutation(
+    Proses_sql $data,
+    string $param,
+    ?object $row_form_cek,
+    $id_form,
+    $id_form_cek,
+    $form_no,
+    $form_no_cek,
+    $form_serv_name,
+    $form_serv_comment,
+    $form_date_serv_name,
+    $form_check_by,
+    $form_date_check_by,
+    $form_superior_aprd,
+    $form_superior_comment,
+    $form_date_superior_aprd,
+    $form_sadmin_comment,
+    $form_date_sadmin_comment,
+    $form_shead_aprd,
+    $form_shead_comment,
+    $form_milestone,
+    $form_status_order,
+    $form_date_shead_aprd,
+    $from_date_update,
+    $form_user_update,
+): array {
+    switch ($param) {
+        case FORM_PARAM_ADD:
+            if ($row_form_cek !== null) {
+                return api_crud_fail("FORM NUMBER DUPLICATE !");
+            }
+
+            $add_form = $data->add_form(
+                $id_form,
+                $form_no,
+                $form_serv_name,
+                $form_serv_comment,
+                $form_date_serv_name,
+                $form_check_by,
+                $form_date_check_by,
+                $form_superior_aprd,
+                $form_superior_comment,
+                $form_date_superior_aprd,
+                $form_sadmin_comment,
+                $form_date_sadmin_comment,
+                $form_shead_aprd,
+                $form_shead_comment,
+                $form_milestone,
+                $form_status_order,
+                $form_date_shead_aprd,
+                $from_date_update,
+                $form_user_update,
             );
-            @$total_forms = 0;
-            if (@$count_q) {
-                @$row_cnt = $count_q->fetch_object();
-                if (isset($row_cnt->cnt)) {
-                    @$total_forms = (int) $row_cnt->cnt;
-                }
-            }
-            while (@$row_form = $data_form->fetch_object()) {
-                if (isset($row_form)) {
-                    @$id_form = $row_form->id_form;
-                    @$form_no = $row_form->form_no;
-                    @$form_serv_name = $row_form->form_serv_name;
-                    @$form_serv_comment = $row_form->form_serv_comment;
-                    @$form_date_serv_name = $row_form->form_date_serv_name;
-                    @$form_check_by = $row_form->form_check_by;
-                    @$form_date_check_by = $row_form->form_date_check_by;
-                    @$form_superior_aprd = $row_form->form_superior_aprd;
-                    @$form_superior_comment = $row_form->form_superior_comment;
-                    @$form_date_superior_aprd =
-                        $row_form->form_date_superior_aprd;
-                    @$form_sadmin_comment = $row_form->form_sadmin_comment;
-                    @$form_date_sadmin_comment =
-                        $row_form->form_date_sadmin_comment;
-                    @$form_shead_aprd = $row_form->form_shead_aprd;
-                    @$form_date_shead_aprd = $row_form->form_date_shead_aprd;
-                    @$form_shead_comment = $row_form->form_shead_comment;
 
-                    @$from_date_update = $row_form->from_date_update;
-                    @$form_user_update = $row_form->form_user_update;
-                    @$form_milestone = $row_form->form_milestone;
-                    @$form_status_order = $row_form->form_status_order;
-                    @$superior_id = "";
-                    @$data_user = $data->data_user(
-                        "",
-                        "",
-                        "",
-                        @$form_serv_name,
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                    );
-                    @$row_user = $data_user->fetch_object();
-                    if (isset($row_user)) {
-                        @$superior_id = $row_user->superior_id;
-                    }
-                } else {
-                    @$id_form = "";
-                    @$form_no = "";
-                    @$form_serv_name = "";
-                    @$form_check_by = "";
-                    @$form_date_serv_name = "";
-                    @$form_serv_comment = "";
-                    @$form_superior_aprd = "";
-                    @$form_superior_comment = "";
-                    @$form_sadmin_comment = "";
-                    @$form_shead_aprd = "";
-                    @$form_shead_comment = "";
-                    @$form_date_check_by = "";
-                    @$from_date_update = "";
-                    @$form_user_update = "";
-                    @$form_date_superior_aprd = "";
-                    @$form_date_sadmin_comment = "";
-                    @$form_date_shead_aprd = "";
-                    @$form_milestone = "";
-                    @$form_status_order = "";
-                    @$superior_id = "";
-                }
-                $b["id_form"] = $id_form;
-                $b["form_no"] = $form_no;
-                $b["form_serv_name"] = $form_serv_name;
-                $b["form_check_by"] = $form_check_by;
-                $b["form_date_serv_name"] = $form_date_serv_name;
-                $b["form_serv_comment"] = $form_serv_comment;
-                $b["form_superior_aprd"] = $form_superior_aprd;
-                $b["form_superior_comment"] = $form_superior_comment;
-                $b["form_sadmin_comment"] = $form_sadmin_comment;
-                $b["form_shead_aprd"] = $form_shead_aprd;
-                $b["form_shead_comment"] = $form_shead_comment;
-                $b["form_date_check_by"] = $form_date_check_by;
-                $b["from_date_update"] = $from_date_update;
-                $b["form_user_update"] = $form_user_update;
-                $b["form_date_superior_aprd"] = $form_date_superior_aprd;
-                $b["form_date_sadmin_comment"] = $form_date_sadmin_comment;
-                $b["form_date_shead_aprd"] = $form_date_shead_aprd;
-                $b["form_milestone"] = $form_milestone;
-                $b["form_status_order"] = $form_status_order;
-                $b["superior_id"] = $superior_id;
+            return api_crud_ok($param, (bool) $add_form, " FAILED");
 
-                array_push($result, $b);
+        case FORM_PARAM_EDIT:
+            if ($id_form != $id_form_cek && $form_no == $form_no_cek) {
+                return api_crud_fail("FORM NUMBER DUPLICATE !!");
             }
-        }
-    }
 
-    switch ($param) {
-        case $add_data_form:
-            if (isset($row_form_cek)) {
-                $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE !";
-            } else {
-                @$add_form = $data->add_form(
-                    @$id_form,
-                    @$form_no,
-                    @$form_serv_name,
-                    @$form_serv_comment,
-                    @$form_date_serv_name,
-                    @$form_check_by,
-                    @$form_date_check_by,
-                    @$form_superior_aprd,
-                    @$form_superior_comment,
-                    @$form_date_superior_aprd,
-                    @$form_sadmin_comment,
-                    @$form_date_sadmin_comment,
-                    @$form_shead_aprd,
-                    @$form_shead_comment,
-                    @$form_milestone,
-                    @$form_status_order,
-                    @$form_date_shead_aprd,
-                    @$from_date_update,
-                    @$form_user_update,
-                );
-                if ($add_form) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param  FAILED";
-                }
+            if ($id_form === null || $id_form === "") {
+                return api_crud_fail("ERROR $param !!");
             }
-            break;
-        case $edit_data_form:
-            if (@$id_form != @$id_form_cek && $form_no == $form_no_cek) {
-                $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE !!";
-            } elseif (@$id_form == null || @$id_form == "") {
-                $response["value"] = "0";
-                $response["message"] = "ERROR $param !!";
-            } else {
-                @$edit_form = $data->edit_form(
-                    @$id_form,
-                    @$form_no,
-                    @$form_serv_name,
-                    @$form_serv_comment,
-                    @$form_date_serv_name,
-                    @$form_check_by,
-                    @$form_date_check_by,
-                    @$form_superior_aprd,
-                    @$form_superior_comment,
-                    @$form_date_superior_aprd,
-                    @$form_sadmin_comment,
-                    @$form_date_sadmin_comment,
-                    @$form_shead_aprd,
-                    @$form_shead_comment,
-                    @$form_milestone,
-                    @$form_status_order,
-                    @$form_date_shead_aprd,
-                    @$from_date_update,
-                    @$form_user_update,
-                );
-                if ($edit_form) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param FAILED";
-                }
+
+            $edit_form = $data->edit_form(
+                $id_form,
+                $form_no,
+                $form_serv_name,
+                $form_serv_comment,
+                $form_date_serv_name,
+                $form_check_by,
+                $form_date_check_by,
+                $form_superior_aprd,
+                $form_superior_comment,
+                $form_date_superior_aprd,
+                $form_sadmin_comment,
+                $form_date_sadmin_comment,
+                $form_shead_aprd,
+                $form_shead_comment,
+                $form_milestone,
+                $form_status_order,
+                $form_date_shead_aprd,
+                $from_date_update,
+                $form_user_update,
+            );
+
+            return api_crud_ok($param, (bool) $edit_form);
+
+        case FORM_PARAM_DELETE:
+            if ($id_form === null || $id_form === "") {
+                return api_crud_fail("ERROR $param !");
             }
-            break;
-        case @$delete_data_form:
-            if (@$id_form == null || @$id_form == "") {
-                $response["value"] = "0";
-                $response["message"] = "ERROR $param !";
-            } else {
-                $delete_form = $data->delete_form(
-                    @$id_form,
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                );
-                if ($delete_form) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param FAILED";
-                }
-            }
-            break;
+
+            $delete_form = $data->delete_form(
+                $id_form,
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+            );
+
+            return api_crud_ok($param, (bool) $delete_form);
+
         default:
-            $response["value"] = "2";
-            $response["message"] = "$param DATA FAILED";
-            break;
+            return api_crud_unknown_param($param);
     }
-
-    switch ($param) {
-        case $add_data_form:
-            array_push($result, $response);
-            break;
-        case $edit_data_form:
-            array_push($result, $response);
-            break;
-        case $delete_data_form:
-            array_push($result, $response);
-            break;
-        default:
-            break;
-    }
-    if (@$param == @$view_data_form) {
-        echo json_encode(
-            [
-                "total" => isset($total_forms) ? (int) $total_forms : 0,
-                "data" => $result,
-            ],
-            JSON_UNESCAPED_UNICODE,
-        );
-    } else {
-        echo json_encode($result);
-    }
-} ?> 
+}

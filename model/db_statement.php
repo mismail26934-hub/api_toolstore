@@ -5,7 +5,7 @@
  */
 trait DbStatementTrait
 {
-    private function db(): mysqli
+    protected function db(): mysqli
     {
         return $this->mysqli->conn;
     }
@@ -13,7 +13,7 @@ trait DbStatementTrait
     /**
      * @return mysqli_result|bool
      */
-    private function db_query(string $sql)
+    protected function db_query(string $sql)
     {
         $db = $this->db();
         $result = $db->query($sql);
@@ -26,7 +26,7 @@ trait DbStatementTrait
     /**
      * @param array<string, string|null> $data
      */
-    private function db_insert(string $table, array $data): mysqli_stmt
+    protected function db_insert(string $table, array $data): mysqli_stmt
     {
         $db = $this->db();
         $cols = array_keys($data);
@@ -52,7 +52,7 @@ trait DbStatementTrait
     /**
      * @param array<string, string|null> $data
      */
-    private function db_update(
+    protected function db_update(
         string $table,
         array $data,
         string $whereCol,
@@ -84,7 +84,7 @@ trait DbStatementTrait
         return $stmt;
     }
 
-    private function db_delete_where(
+    protected function db_delete_where(
         string $table,
         string $whereCol,
         string $whereVal,
@@ -106,7 +106,7 @@ trait DbStatementTrait
     /**
      * @return mysqli_result|false
      */
-    private function db_select_where(
+    protected function db_select_where(
         string $table,
         string $whereCol,
         string $whereVal,
@@ -132,7 +132,7 @@ trait DbStatementTrait
     /**
      * @return mysqli_result|false
      */
-    private function db_run_select(string $sql, string $types, array $params)
+    protected function db_run_select(string $sql, string $types, array $params)
     {
         $db = $this->db();
         $stmt = $db->prepare($sql);

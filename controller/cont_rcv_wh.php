@@ -1,173 +1,174 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
-    require_once "../conn/conn.php";
-    require_once "../conn/api_auth.php";
-    require_once "../model/dbs.php";
 
-    $connection = new Dbs($host, $user, $pass, $db);
-    include "../model/m_proses.php";
-    $result = [];
-    $data = new Proses_sql($connection);
-    api_guard($data);
-    // ----------------------------------------------
-    //STATUS :
-    // 1.REQUEST SUPERIOR APPROVAL
-    // 2.CHECK BY TOOL STORE
-    // 3.REVIEW SERVICE ADMIN
-    // 4.WAIT APPROVAL SERVICE DEPT. HEAD
-    // 5.WAIT ORDER BY COUNTER
-    // 6.WAIT ORDER BY GA
-    // 7.ORDER DONE
-    // 8.RECEIVED WH/GA
-    // 9.RECEIVED TOOL STORE
-    // 10.COMPLETED
-    // 11.REJECTED
-    // ----------------------------------------------
-    @$param = $_POST["param"];
-    @$id_rcv_wh = $_POST["id_rcv_wh"];
-    @$id_form_detail = $_POST["id_form_detail"];
-    @$rcv_wh_date = $_POST["rcv_wh_date"];
-    @$rcv_wh_id_input = $_POST["rcv_wh_id_input"];
-    @$rcv_wh_date_input = $_POST["rcv_wh_date_input"];
+require_once __DIR__ . "/../conn/api_bootstrap.php";
+require_once __DIR__ . "/../conn/api_crud.php";
 
-    @$add_data_rcv_wh = "ADD DATA RCV WH";
-    @$edit_data_rcv_wh = "EDIT DATA RCV WH";
-    @$view_data_rcv_wh = "VIEW DATA RCV WH";
-    @$delete_data_rcv_wh = "DELETED DATA RCV WH";
+if (!api_is_post_with_param()) {
+    return;
+}
 
-    if (
-        @$param == @$add_data_rcv_wh ||
-        @$param == @$edit_data_rcv_wh ||
-        @$param == @$view_data_rcv_wh
-    ) {
-        @$data_rcv_wh = $data->data_rcv_wh(
-            @$param == @$add_data_rcv_wh || @$param == @$edit_data_rcv_wh
-                ? ""
-                : @$id_rcv_wh,
-            @$id_form_detail,
-            @$rcv_wh_date,
-            @$rcv_wh_id_input,
-            @$rcv_wh_date_input,
-        );
-        if (@$param == @$add_data_rcv_wh || @$param == @$edit_data_rcv_wh) {
-            @$row_rcv_wh_cek = $data_rcv_wh->fetch_object();
-            @$id_rcv_wh_cek = $row_rcv_wh_cek->id_rcv_wh;
-            @$id_form_detail_cek = $row_rcv_wh_cek->id_form_detail;
-            @$rcv_wh_date_cek = $row_rcv_wh_cek->rcv_wh_date;
-        } elseif (@$param == @$view_data_rcv_wh) {
-            while (@$row_rcv_wh = $data_rcv_wh->fetch_object()) {
-                if (isset($row_rcv_wh)) {
-                    @$id_rcv_wh = $row_rcv_wh->id_rcv_wh;
-                    @$id_form_detail = $row_rcv_wh->id_form_detail;
-                    @$rcv_wh_date = $row_rcv_wh->rcv_wh_date;
-                    @$rcv_wh_id_input = $row_rcv_wh->rcv_wh_id_input;
-                    @$rcv_wh_date_input = $row_rcv_wh->rcv_wh_date_input;
-                } else {
-                    @$id_rcv_wh = "";
-                    @$id_form_detail = "";
-                    @$rcv_wh_date = "";
-                    @$rcv_wh_id_input = "";
-                    @$rcv_wh_date_input = "";
-                }
-                $b["id_rcv_wh"] = $id_rcv_wh;
-                $b["id_form_detail"] = $id_form_detail;
-                $b["rcv_wh_date"] = $rcv_wh_date;
-                $b["rcv_wh_id_input"] = $rcv_wh_id_input;
-                $b["rcv_wh_date_input"] = $rcv_wh_date_input;
+const RCV_WH_PARAM_ADD = "ADD DATA RCV WH";
+const RCV_WH_PARAM_EDIT = "EDIT DATA RCV WH";
+const RCV_WH_PARAM_VIEW = "VIEW DATA RCV WH";
+const RCV_WH_PARAM_DELETE = "DELETED DATA RCV WH";
 
-                array_push($result, $b);
-            }
+$result = [];
+$data = api_bootstrap_data();
+$param = api_post_param();
+
+$id_rcv_wh = $_POST["id_rcv_wh"] ?? null;
+$id_form_detail = $_POST["id_form_detail"] ?? null;
+$rcv_wh_date = $_POST["rcv_wh_date"] ?? null;
+$rcv_wh_id_input = $_POST["rcv_wh_id_input"] ?? null;
+$rcv_wh_date_input = $_POST["rcv_wh_date_input"] ?? null;
+
+$row_rcv_wh_cek = null;
+$id_rcv_wh_cek = null;
+$id_form_detail_cek = null;
+
+if (
+    $param === RCV_WH_PARAM_ADD ||
+    $param === RCV_WH_PARAM_EDIT ||
+    $param === RCV_WH_PARAM_VIEW
+) {
+    $data_rcv_wh = $data->data_rcv_wh(
+        $param === RCV_WH_PARAM_ADD || $param === RCV_WH_PARAM_EDIT
+            ? ""
+            : $id_rcv_wh,
+        $id_form_detail,
+        $rcv_wh_date,
+        $rcv_wh_id_input,
+        $rcv_wh_date_input,
+    );
+
+    if ($param === RCV_WH_PARAM_ADD || $param === RCV_WH_PARAM_EDIT) {
+        $row_rcv_wh_cek = $data_rcv_wh->fetch_object();
+        if ($row_rcv_wh_cek !== null) {
+            $id_rcv_wh_cek = $row_rcv_wh_cek->id_rcv_wh;
+            $id_form_detail_cek = $row_rcv_wh_cek->id_form_detail;
+        }
+    } elseif ($param === RCV_WH_PARAM_VIEW) {
+        foreach (api_mysqli_fetch_all_objects($data_rcv_wh) as $row_rcv_wh) {
+            $result[] = cont_rcv_wh_format_row($row_rcv_wh);
         }
     }
+}
 
+$response = cont_rcv_wh_handle_mutation(
+    $data,
+    $param,
+    $row_rcv_wh_cek,
+    $id_rcv_wh,
+    $id_rcv_wh_cek,
+    $id_form_detail,
+    $id_form_detail_cek,
+    $rcv_wh_date,
+    $rcv_wh_id_input,
+    $rcv_wh_date_input,
+);
+
+api_crud_push_mutation(
+    $result,
+    $param,
+    $response,
+    RCV_WH_PARAM_ADD,
+    RCV_WH_PARAM_EDIT,
+    RCV_WH_PARAM_DELETE,
+);
+
+echo json_encode($result);
+
+/**
+ * @return array<string, mixed>
+ */
+function cont_rcv_wh_format_row(?object $row): array
+{
+    if ($row === null) {
+        return [
+            "id_rcv_wh" => "",
+            "id_form_detail" => "",
+            "rcv_wh_date" => "",
+            "rcv_wh_id_input" => "",
+            "rcv_wh_date_input" => "",
+        ];
+    }
+
+    return [
+        "id_rcv_wh" => $row->id_rcv_wh,
+        "id_form_detail" => $row->id_form_detail,
+        "rcv_wh_date" => $row->rcv_wh_date,
+        "rcv_wh_id_input" => $row->rcv_wh_id_input,
+        "rcv_wh_date_input" => $row->rcv_wh_date_input,
+    ];
+}
+
+/**
+ * @return array{value: string, message: string}
+ */
+function cont_rcv_wh_handle_mutation(
+    Proses_sql $data,
+    string $param,
+    ?object $row_rcv_wh_cek,
+    $id_rcv_wh,
+    $id_rcv_wh_cek,
+    $id_form_detail,
+    $id_form_detail_cek,
+    $rcv_wh_date,
+    $rcv_wh_id_input,
+    $rcv_wh_date_input,
+): array {
     switch ($param) {
-        case $add_data_rcv_wh:
-            if (isset($row_rcv_wh_cek)) {
-                $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE";
-            } else {
-                @$add_rcv_wh = $data->add_rcv_wh(
-                    @$id_rcv_wh,
-                    @$id_form_detail,
-                    @$rcv_wh_date,
-                    @$rcv_wh_id_input,
-                    @$rcv_wh_date_input,
-                );
-                if ($add_rcv_wh) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param  FAILED";
-                }
+        case RCV_WH_PARAM_ADD:
+            if ($row_rcv_wh_cek !== null) {
+                return api_crud_fail("FORM NUMBER DUPLICATE");
             }
-            break;
-        case $edit_data_rcv_wh:
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->add_rcv_wh(
+                    $id_rcv_wh,
+                    $id_form_detail,
+                    $rcv_wh_date,
+                    $rcv_wh_id_input,
+                    $rcv_wh_date_input,
+                ),
+                " FAILED",
+            );
+
+        case RCV_WH_PARAM_EDIT:
             if (
-                @$id_rcv_wh != @$id_rcv_wh_cek &&
+                $id_rcv_wh != $id_rcv_wh_cek &&
                 $id_form_detail == $id_form_detail_cek
             ) {
-                $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE !";
-            } elseif (@$id_rcv_wh == null || @$id_rcv_wh == "") {
-                $response["value"] = "0";
-                $response["message"] = "ERROR $param !";
-            } else {
-                @$edit_rcv_wh = $data->edit_rcv_wh(
-                    @$id_rcv_wh,
-                    @$id_form_detail,
-                    @$rcv_wh_date,
-                    @$rcv_wh_id_input,
-                    @$rcv_wh_date_input,
-                );
-                if ($edit_rcv_wh) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param FAILED";
-                }
+                return api_crud_fail("FORM NUMBER DUPLICATE !");
             }
-            break;
-        case @$delete_data_rcv_wh:
-            if (@$id_rcv_wh == null || @$id_rcv_wh == "") {
-                $response["value"] = "0";
-                $response["message"] = "ERROR $param !";
-            } else {
-                $delete_rcv_wh = $data->delete_rcv_wh(
-                    @$id_rcv_wh,
-                    "",
-                    "",
-                    "",
-                    "",
-                );
-                if ($delete_rcv_wh) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param FAILED";
-                }
-            }
-            break;
-        default:
-            $response["value"] = "2";
-            $response["message"] = "$param DATA FAILED";
-            break;
-    }
 
-    switch ($param) {
-        case $add_data_rcv_wh:
-            array_push($result, $response);
-            break;
-        case $edit_data_rcv_wh:
-            array_push($result, $response);
-            break;
-        case $delete_data_rcv_wh:
-            array_push($result, $response);
-            break;
+            if ($id_rcv_wh === null || $id_rcv_wh === "") {
+                return api_crud_fail("ERROR $param !");
+            }
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->edit_rcv_wh(
+                    $id_rcv_wh,
+                    $id_form_detail,
+                    $rcv_wh_date,
+                    $rcv_wh_id_input,
+                    $rcv_wh_date_input,
+                ),
+            );
+
+        case RCV_WH_PARAM_DELETE:
+            if ($id_rcv_wh === null || $id_rcv_wh === "") {
+                return api_crud_fail("ERROR $param !");
+            }
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->delete_rcv_wh($id_rcv_wh, "", "", "", ""),
+            );
+
         default:
-            break;
+            return api_crud_unknown_param($param);
     }
-    echo json_encode($result);
-} ?> 
+}

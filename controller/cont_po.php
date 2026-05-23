@@ -1,168 +1,177 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
-    require_once "../conn/conn.php";
-    require_once "../conn/api_auth.php";
-    require_once "../model/dbs.php";
 
-    $connection = new Dbs($host, $user, $pass, $db);
-    include "../model/m_proses.php";
-    $result = [];
-    $data = new Proses_sql($connection);
-    api_guard($data);
-    // ----------------------------------------------
-    //STATUS :
-    // 1.REQUEST SUPERIOR APPROVAL
-    // 2.CHECK BY TOOL STORE
-    // 3.REVIEW SERVICE ADMIN
-    // 4.WAIT APPROVAL SERVICE DEPT. HEAD
-    // 5.WAIT ORDER BY COUNTER
-    // 6.WAIT ORDER BY GA
-    // 7.ORDER DONE
-    // 8.RECEIVED WH/GA
-    // 9.RECEIVED TOOL STORE
-    // 10.COMPLETED
-    // 11.REJECTED
-    // ----------------------------------------------
-    @$param = $_POST["param"];
-    @$id_po = $_POST["id_po"];
-    @$id_form_detail = $_POST["id_form_detail"];
-    @$po_no = $_POST["po_no"];
-    @$date_update_po = $_POST["date_update_po"];
-    @$user_update_po = $_POST["user_update_po"];
+require_once __DIR__ . "/../conn/api_bootstrap.php";
+require_once __DIR__ . "/../conn/api_crud.php";
 
-    @$add_data_po = "ADD DATA PO";
-    @$edit_data_po = "EDIT DATA PO";
-    @$view_data_po = "VIEW DATA PO";
-    @$delete_data_po = "DELETED DATA PO";
+if (!api_is_post_with_param()) {
+    return;
+}
 
-    if (
-        @$param == @$add_data_po ||
-        @$param == @$edit_data_po ||
-        @$param == @$view_data_po
-    ) {
-        @$data_po = $data->data_po(
-            @$param == @$add_data_po || @$param == @$edit_data_po
-                ? ""
-                : @$id_po,
-            @$id_form_detail,
-            @$po_no,
-            "",
-            "",
-        );
-        if (@$param == @$add_data_po || @$param == @$edit_data_po) {
-            @$row_po_cek = $data_po->fetch_object();
-            @$id_po_cek = $row_po_cek->id_po;
-            @$id_form_detail_cek = $row_po_cek->id_form_detail;
-            @$po_no_cek = $row_po_cek->po_no;
-        } elseif (@$param == @$view_data_po) {
-            while (@$row_po = $data_po->fetch_object()) {
-                if (isset($row_po)) {
-                    @$id_po = $row_po->id_po;
-                    @$id_form_detail = $row_po->id_form_detail;
-                    @$po_no = $row_po->po_no;
-                    @$date_update_po = $row_po->date_update_po;
-                    @$user_update_po = $row_po->user_update_po;
-                } else {
-                    @$id_po = "";
-                    @$id_form_detail = "";
-                    @$po_no = "";
-                    @$date_update_po = "";
-                    @$user_update_po = "";
-                }
-                $b["id_po"] = $id_po;
-                $b["id_form_detail"] = $id_form_detail;
-                $b["po_no"] = $po_no;
-                $b["date_update_po"] = $date_update_po;
-                $b["user_update_po"] = $user_update_po;
+const PO_PARAM_ADD = "ADD DATA PO";
+const PO_PARAM_EDIT = "EDIT DATA PO";
+const PO_PARAM_VIEW = "VIEW DATA PO";
+const PO_PARAM_DELETE = "DELETED DATA PO";
 
-                array_push($result, $b);
-            }
+$result = [];
+$data = api_bootstrap_data();
+$param = api_post_param();
+
+$id_po = $_POST["id_po"] ?? null;
+$id_form_detail = $_POST["id_form_detail"] ?? null;
+$po_no = $_POST["po_no"] ?? null;
+$date_update_po = $_POST["date_update_po"] ?? null;
+$user_update_po = $_POST["user_update_po"] ?? null;
+
+$row_po_cek = null;
+$id_po_cek = null;
+$id_form_detail_cek = null;
+$po_no_cek = null;
+
+if (
+    $param === PO_PARAM_ADD ||
+    $param === PO_PARAM_EDIT ||
+    $param === PO_PARAM_VIEW
+) {
+    $data_po = $data->data_po(
+        $param === PO_PARAM_ADD || $param === PO_PARAM_EDIT ? "" : $id_po,
+        $id_form_detail,
+        $po_no,
+        "",
+        "",
+    );
+
+    if ($param === PO_PARAM_ADD || $param === PO_PARAM_EDIT) {
+        $row_po_cek = $data_po->fetch_object();
+        if ($row_po_cek !== null) {
+            $id_po_cek = $row_po_cek->id_po;
+            $id_form_detail_cek = $row_po_cek->id_form_detail;
+            $po_no_cek = $row_po_cek->po_no;
+        }
+    } elseif ($param === PO_PARAM_VIEW) {
+        foreach (api_mysqli_fetch_all_objects($data_po) as $row_po) {
+            $result[] = cont_po_format_row($row_po);
         }
     }
+}
 
+$response = cont_po_handle_mutation(
+    $data,
+    $param,
+    $row_po_cek,
+    $id_po,
+    $id_po_cek,
+    $id_form_detail,
+    $id_form_detail_cek,
+    $po_no,
+    $po_no_cek,
+    $date_update_po,
+    $user_update_po,
+);
+
+api_crud_push_mutation(
+    $result,
+    $param,
+    $response,
+    PO_PARAM_ADD,
+    PO_PARAM_EDIT,
+    PO_PARAM_DELETE,
+);
+
+echo json_encode($result);
+
+/**
+ * @return array<string, mixed>
+ */
+function cont_po_format_row(?object $row): array
+{
+    if ($row === null) {
+        return [
+            "id_po" => "",
+            "id_form_detail" => "",
+            "po_no" => "",
+            "date_update_po" => "",
+            "user_update_po" => "",
+        ];
+    }
+
+    return [
+        "id_po" => $row->id_po,
+        "id_form_detail" => $row->id_form_detail,
+        "po_no" => $row->po_no,
+        "date_update_po" => $row->date_update_po,
+        "user_update_po" => $row->user_update_po,
+    ];
+}
+
+/**
+ * @return array{value: string, message: string}
+ */
+function cont_po_handle_mutation(
+    Proses_sql $data,
+    string $param,
+    ?object $row_po_cek,
+    $id_po,
+    $id_po_cek,
+    $id_form_detail,
+    $id_form_detail_cek,
+    $po_no,
+    $po_no_cek,
+    $date_update_po,
+    $user_update_po,
+): array {
     switch ($param) {
-        case $add_data_po:
-            if (isset($row_po_cek)) {
-                $response["value"] = "0";
-                $response["message"] = "PO DUPLICATE";
-            } else {
-                @$add_po = $data->add_po(
-                    @$id_po,
-                    @$id_form_detail,
-                    @$po_no,
-                    @$date_update_po,
-                    @$user_update_po,
-                );
-                if ($add_po) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param  FAILED";
-                }
+        case PO_PARAM_ADD:
+            if ($row_po_cek !== null) {
+                return api_crud_fail("PO DUPLICATE");
             }
-            break;
-        case $edit_data_po:
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->add_po(
+                    $id_po,
+                    $id_form_detail,
+                    $po_no,
+                    $date_update_po,
+                    $user_update_po,
+                ),
+                " FAILED",
+            );
+
+        case PO_PARAM_EDIT:
             if (
-                @$id_po != @$id_po_cek &&
+                $id_po != $id_po_cek &&
                 $id_form_detail == $id_form_detail_cek &&
                 $po_no == $po_no_cek
             ) {
-                $response["value"] = "0";
-                $response["message"] = "PO DUPLICATE !";
-            } elseif (@$id_po == null || @$id_po == "") {
-                $response["value"] = "0";
-                $response["message"] = "ERROR $param !";
-            } else {
-                @$edit_po = $data->edit_po(
-                    @$id_po,
-                    @$id_form_detail,
-                    @$po_no,
-                    @$date_update_po,
-                    @$user_update_po,
-                );
-                if ($edit_po) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param FAILED";
-                }
+                return api_crud_fail("PO DUPLICATE !");
             }
-            break;
-        case @$delete_data_po:
-            if (@$id_po == null || @$id_po == "") {
-                $response["value"] = "0";
-                $response["message"] = "ERROR $param !";
-            } else {
-                $delete_po = $data->delete_po(@$id_po, "", "", "", "");
-                if ($delete_po) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param FAILED";
-                }
-            }
-            break;
-        default:
-            $response["value"] = "2";
-            $response["message"] = "$param DATA FAILED";
-            break;
-    }
 
-    switch ($param) {
-        case $add_data_po:
-            array_push($result, $response);
-            break;
-        case $edit_data_po:
-            array_push($result, $response);
-            break;
-        case $delete_data_po:
-            array_push($result, $response);
-            break;
+            if ($id_po === null || $id_po === "") {
+                return api_crud_fail("ERROR $param !");
+            }
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->edit_po(
+                    $id_po,
+                    $id_form_detail,
+                    $po_no,
+                    $date_update_po,
+                    $user_update_po,
+                ),
+            );
+
+        case PO_PARAM_DELETE:
+            if ($id_po === null || $id_po === "") {
+                return api_crud_fail("ERROR $param !");
+            }
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->delete_po($id_po, "", "", "", ""),
+            );
+
         default:
-            break;
+            return api_crud_unknown_param($param);
     }
-    echo json_encode($result);
-} ?> 
+}

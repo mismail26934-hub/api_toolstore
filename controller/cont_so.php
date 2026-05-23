@@ -1,181 +1,192 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
-    require_once "../conn/conn.php";
-    require_once "../conn/api_auth.php";
-    require_once "../model/dbs.php";
 
-    $connection = new Dbs($host, $user, $pass, $db);
-    include "../model/m_proses.php";
-    $result = [];
-    $data = new Proses_sql($connection);
-    api_guard($data);
-    // ----------------------------------------------
-    //STATUS :
-    // 1.REQUEST SUPERIOR APPROVAL
-    // 2.CHECK BY TOOL STORE
-    // 3.REVIEW SERVICE ADMIN
-    // 4.WAIT APPROVAL SERVICE DEPT. HEAD
-    // 5.WAIT ORDER BY COUNTER
-    // 6.WAIT ORDER BY GA
-    // 7.ORDER DONE
-    // 8.RECEIVED WH/GA
-    // 9.RECEIVED TOOL STORE
-    // 10.COMPLETED
-    // 11.REJECTED
-    // ----------------------------------------------
-    @$param = $_POST["param"];
-    @$id_so = $_POST["id_so"];
-    @$id_form_detail = $_POST["id_form_detail"];
-    @$so = $_POST["so"];
-    @$eta = $_POST["eta"];
-    @$note_so = $_POST["note_so"];
-    @$date_update_so = $_POST["date_update_so"];
-    @$id_update_so = $_POST["id_update_so"];
+require_once __DIR__ . "/../conn/api_bootstrap.php";
+require_once __DIR__ . "/../conn/api_crud.php";
 
-    @$add_data_so = "ADD DATA SO";
-    @$edit_data_so = "EDIT DATA SO";
-    @$view_data_so = "VIEW DATA SO";
-    @$delete_data_so = "DELETED DATA SO";
+if (!api_is_post_with_param()) {
+    return;
+}
 
-    if (
-        @$param == @$add_data_so ||
-        @$param == @$edit_data_so ||
-        @$param == @$view_data_so
-    ) {
-        @$data_so = $data->data_so(
-            @$param == @$add_data_so || @$param == @$edit_data_so
-                ? ""
-                : @$id_so,
-            @$id_form_detail,
-            @$so,
-            "",
-            "",
-            "",
-            "",
-        );
-        if (@$param == @$add_data_so || @$param == @$edit_data_so) {
-            @$row_so_cek = $data_so->fetch_object();
-            @$id_so_cek = $row_so_cek->id_so;
-            @$id_form_detail_cek = $row_so_cek->id_form_detail;
-            @$so_cek = $row_so_cek->so;
-        } elseif (@$param == @$view_data_so) {
-            while (@$row_so = $data_so->fetch_object()) {
-                if (isset($row_so)) {
-                    @$id_so = $row_so->id_so;
-                    @$id_form_detail = $row_so->id_form_detail;
-                    @$so = $row_so->so;
-                    @$eta = $row_so->eta;
-                    @$note_so = $row_so->note_so;
-                    @$date_update_so = $row_so->date_update_so;
-                    @$id_update_so = $row_so->id_update_so;
-                } else {
-                    @$id_so = "";
-                    @$id_form_detail = "";
-                    @$so = "";
-                    @$eta = "";
-                    @$note_so = "";
-                    @$date_update_so = "";
-                    @$id_update_so = "";
-                }
-                $b["id_so"] = $id_so;
-                $b["id_form_detail"] = $id_form_detail;
-                $b["so"] = $so;
-                $b["eta"] = $eta;
-                $b["note_so"] = $note_so;
-                $b["date_update_so"] = $date_update_so;
-                $b["id_update_so"] = $id_update_so;
+const SO_PARAM_ADD = "ADD DATA SO";
+const SO_PARAM_EDIT = "EDIT DATA SO";
+const SO_PARAM_VIEW = "VIEW DATA SO";
+const SO_PARAM_DELETE = "DELETED DATA SO";
 
-                array_push($result, $b);
-            }
+$result = [];
+$data = api_bootstrap_data();
+$param = api_post_param();
+
+$id_so = $_POST["id_so"] ?? null;
+$id_form_detail = $_POST["id_form_detail"] ?? null;
+$so = $_POST["so"] ?? null;
+$eta = $_POST["eta"] ?? null;
+$note_so = $_POST["note_so"] ?? null;
+$date_update_so = $_POST["date_update_so"] ?? null;
+$id_update_so = $_POST["id_update_so"] ?? null;
+
+$row_so_cek = null;
+$id_so_cek = null;
+$id_form_detail_cek = null;
+$so_cek = null;
+
+if (
+    $param === SO_PARAM_ADD ||
+    $param === SO_PARAM_EDIT ||
+    $param === SO_PARAM_VIEW
+) {
+    $data_so = $data->data_so(
+        $param === SO_PARAM_ADD || $param === SO_PARAM_EDIT ? "" : $id_so,
+        $id_form_detail,
+        $so,
+        "",
+        "",
+        "",
+        "",
+    );
+
+    if ($param === SO_PARAM_ADD || $param === SO_PARAM_EDIT) {
+        $row_so_cek = $data_so->fetch_object();
+        if ($row_so_cek !== null) {
+            $id_so_cek = $row_so_cek->id_so;
+            $id_form_detail_cek = $row_so_cek->id_form_detail;
+            $so_cek = $row_so_cek->so;
+        }
+    } elseif ($param === SO_PARAM_VIEW) {
+        foreach (api_mysqli_fetch_all_objects($data_so) as $row_so) {
+            $result[] = cont_so_format_row($row_so);
         }
     }
+}
 
+$response = cont_so_handle_mutation(
+    $data,
+    $param,
+    $row_so_cek,
+    $id_so,
+    $id_so_cek,
+    $id_form_detail,
+    $id_form_detail_cek,
+    $so,
+    $so_cek,
+    $eta,
+    $note_so,
+    $date_update_so,
+    $id_update_so,
+);
+
+api_crud_push_mutation(
+    $result,
+    $param,
+    $response,
+    SO_PARAM_ADD,
+    SO_PARAM_EDIT,
+    SO_PARAM_DELETE,
+);
+
+echo json_encode($result);
+
+/**
+ * @return array<string, mixed>
+ */
+function cont_so_format_row(?object $row): array
+{
+    if ($row === null) {
+        return [
+            "id_so" => "",
+            "id_form_detail" => "",
+            "so" => "",
+            "eta" => "",
+            "note_so" => "",
+            "date_update_so" => "",
+            "id_update_so" => "",
+        ];
+    }
+
+    return [
+        "id_so" => $row->id_so,
+        "id_form_detail" => $row->id_form_detail,
+        "so" => $row->so,
+        "eta" => $row->eta,
+        "note_so" => $row->note_so,
+        "date_update_so" => $row->date_update_so,
+        "id_update_so" => $row->id_update_so,
+    ];
+}
+
+/**
+ * @return array{value: string, message: string}
+ */
+function cont_so_handle_mutation(
+    Proses_sql $data,
+    string $param,
+    ?object $row_so_cek,
+    $id_so,
+    $id_so_cek,
+    $id_form_detail,
+    $id_form_detail_cek,
+    $so,
+    $so_cek,
+    $eta,
+    $note_so,
+    $date_update_so,
+    $id_update_so,
+): array {
     switch ($param) {
-        case $add_data_so:
-            if (isset($row_so_cek)) {
-                $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE";
-            } else {
-                @$add_so = $data->add_so(
-                    @$id_so,
-                    @$id_form_detail,
-                    @$so,
-                    @$eta,
-                    @$note_so,
-                    @$date_update_so,
-                    @$id_update_so,
-                );
-                if ($add_so) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param  FAILED";
-                }
+        case SO_PARAM_ADD:
+            if ($row_so_cek !== null) {
+                return api_crud_fail("FORM NUMBER DUPLICATE");
             }
-            break;
-        case $edit_data_so:
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->add_so(
+                    $id_so,
+                    $id_form_detail,
+                    $so,
+                    $eta,
+                    $note_so,
+                    $date_update_so,
+                    $id_update_so,
+                ),
+                " FAILED",
+            );
+
+        case SO_PARAM_EDIT:
             if (
-                @$id_so != @$id_so_cek &&
+                $id_so != $id_so_cek &&
                 $id_form_detail == $id_form_detail_cek
             ) {
-                $response["value"] = "0";
-                $response["message"] = "FORM NUMBER DUPLICATE !";
-            } elseif (@$id_so == null || @$id_so == "") {
-                $response["value"] = "0";
-                $response["message"] = "ERROR $param !";
-            } else {
-                @$edit_so = $data->edit_so(
-                    @$id_so,
-                    @$id_form_detail,
-                    @$so,
-                    @$eta,
-                    @$note_so,
-                    @$date_update_so,
-                    @$id_update_so,
-                );
-                if ($edit_so) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param FAILED";
-                }
+                return api_crud_fail("FORM NUMBER DUPLICATE !");
             }
-            break;
-        case @$delete_data_so:
-            if (@$id_so == null || @$id_so == "") {
-                $response["value"] = "0";
-                $response["message"] = "ERROR $param !";
-            } else {
-                $delete_so = $data->delete_so(@$id_so, "", "", "", "", "", "");
-                if ($delete_so) {
-                    $response["value"] = "1";
-                    $response["message"] = "$param SUCCESS";
-                } else {
-                    $response["value"] = "0";
-                    $response["message"] = "$param FAILED";
-                }
-            }
-            break;
-        default:
-            $response["value"] = "2";
-            $response["message"] = "$param DATA FAILED";
-            break;
-    }
 
-    switch ($param) {
-        case $add_data_so:
-            array_push($result, $response);
-            break;
-        case $edit_data_so:
-            array_push($result, $response);
-            break;
-        case $delete_data_so:
-            array_push($result, $response);
-            break;
+            if ($id_so === null || $id_so === "") {
+                return api_crud_fail("ERROR $param !");
+            }
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->edit_so(
+                    $id_so,
+                    $id_form_detail,
+                    $so,
+                    $eta,
+                    $note_so,
+                    $date_update_so,
+                    $id_update_so,
+                ),
+            );
+
+        case SO_PARAM_DELETE:
+            if ($id_so === null || $id_so === "") {
+                return api_crud_fail("ERROR $param !");
+            }
+
+            return api_crud_ok(
+                $param,
+                (bool) $data->delete_so($id_so, "", "", "", "", "", ""),
+            );
+
         default:
-            break;
+            return api_crud_unknown_param($param);
     }
-    echo json_encode($result);
-} ?> 
+}

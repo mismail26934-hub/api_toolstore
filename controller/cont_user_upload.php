@@ -4,11 +4,8 @@ if (
     isset($_POST["param"]) &&
     $_POST["param"] === "UPLOAD DATA USER"
 ) {
-    require_once "../conn/conn.php";
-    require_once "../conn/password.php";
-    require_once "../conn/api_auth.php";
-    require_once "../model/dbs.php";
-    require_once "../lib/SpreadsheetReader.php";
+    require_once __DIR__ . "/../conn/api_bootstrap.php";
+    require_once __DIR__ . "/../lib/SpreadsheetReader.php";
 
     header("Content-Type: application/json; charset=utf-8");
 
@@ -58,11 +55,9 @@ if (
         exit();
     }
 
-    $connection = new Dbs($host, $user, $pass, $db);
-    include "../model/m_proses.php";
-    $data = new Proses_sql($connection);
-    api_guard($data);
-    $db = $connection->conn;
+    $boot = api_bootstrap_full(true, true);
+    $data = $boot["data"];
+    $db = $boot["connection"]->conn;
 
     $headers = array_map("normalize_header", $rows[0]);
     $columnMap = build_user_column_map($headers);
