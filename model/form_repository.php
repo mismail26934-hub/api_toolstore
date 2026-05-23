@@ -17,18 +17,20 @@ class FormRepository extends RepositoryBase
         $form_serv_name,
         $search,
         $search_field,
+        string $formAlias = "f",
     ) {
+        $f = $formAlias;
         if ((@$id_form ?? "") !== "") {
             $id_esc = $db->real_escape_string($id_form);
-            return " WHERE id_form = '$id_esc' ";
+            return " WHERE $f.id_form = '$id_esc' ";
         }
         if ((@$form_no ?? "") !== "") {
             $no_esc = $db->real_escape_string($form_no);
-            return " WHERE form_no = '$no_esc' ";
+            return " WHERE $f.form_no = '$no_esc' ";
         }
         if ((@$form_serv_name ?? "") !== "") {
             $name_esc = $db->real_escape_string($form_serv_name);
-            return " WHERE form_serv_name = '$name_esc' ";
+            return " WHERE $f.form_serv_name = '$name_esc' ";
         }
 
         $search_trim = trim((string) ($search ?? ""));
@@ -43,27 +45,27 @@ class FormRepository extends RepositoryBase
         $so = $this->tb_so;
         $po = $this->tb_po;
 
-        $detail_match = function ($predicate) use ($fd) {
-            return "EXISTS (SELECT 1 FROM $fd fd WHERE fd.id_form = tb_form.id_form AND ($predicate))";
+        $detail_match = function ($predicate) use ($fd, $f) {
+            return "EXISTS (SELECT 1 FROM $fd fd WHERE fd.id_form = $f.id_form AND ($predicate))";
         };
         $order_match =
             "EXISTS (SELECT 1 FROM $fd fd " .
             "LEFT JOIN $so s ON s.id_form_detail = fd.id_form_detail " .
             "LEFT JOIN $po p ON p.id_form_detail = fd.id_form_detail " .
-            "WHERE fd.id_form = tb_form.id_form AND (IFNULL(s.so,'') LIKE $like OR IFNULL(s.note_so,'') LIKE $like OR IFNULL(p.po_no,'') LIKE $like))";
+            "WHERE fd.id_form = $f.id_form AND (IFNULL(s.so,'') LIKE $like OR IFNULL(s.note_so,'') LIKE $like OR IFNULL(p.po_no,'') LIKE $like))";
 
         switch ($field) {
             case "formno":
             case "form_no":
-                return " WHERE form_no LIKE $like ";
+                return " WHERE $f.form_no LIKE $like ";
             case "serviceman":
-                return " WHERE form_serv_name LIKE $like ";
+                return " WHERE $f.form_serv_name LIKE $like ";
             case "status":
-                return " WHERE form_serv_comment LIKE $like ";
+                return " WHERE $f.form_serv_comment LIKE $like ";
             case "idform":
             case "id_form":
             case "category":
-                return " WHERE CAST(id_form AS CHAR) LIKE $like ";
+                return " WHERE CAST($f.id_form AS CHAR) LIKE $like ";
             case "pngroup":
             case "pn_group":
                 return " WHERE " .
@@ -72,15 +74,23 @@ class FormRepository extends RepositoryBase
             case "pndesc":
             case "pn_desc":
                 return " WHERE " . $detail_match("fd.pn_desc LIKE $like") . " ";
-            case "all":
-            default:
-                return " WHERE (form_no LIKE $like OR form_serv_name LIKE $like OR form_serv_comment LIKE $like " .
-                    "OR CAST(id_form AS CHAR) LIKE $like OR IFNULL(form_check_by,'') LIKE $like " .
-                    "OR IFNULL(form_milestone,'') LIKE $like OR " .
+            case "order":
+            case "so":
+            case "po":
+                return " WHERE $order_match ";
+            case "extended":
+                return " WHERE ($f.form_no LIKE $like OR $f.form_serv_name LIKE $like OR $f.form_serv_comment LIKE $like " .
+                    "OR CAST($f.id_form AS CHAR) LIKE $like OR IFNULL($f.form_check_by,'') LIKE $like " .
+                    "OR IFNULL($f.form_milestone,'') LIKE $like OR " .
                     $detail_match(
                         "fd.pn_group LIKE $like OR fd.pn_desc LIKE $like",
                     ) .
                     " OR $order_match) ";
+            case "all":
+            default:
+                return " WHERE ($f.form_no LIKE $like OR $f.form_serv_name LIKE $like OR $f.form_serv_comment LIKE $like " .
+                    "OR CAST($f.id_form AS CHAR) LIKE $like OR IFNULL($f.form_check_by,'') LIKE $like " .
+                    "OR IFNULL($f.form_milestone,'') LIKE $like) ";
         }
     }
 
@@ -113,7 +123,7 @@ class FormRepository extends RepositoryBase
         $table = $this->tb_form;
         $select = $this->sql_select;
         $sql = $select;
-        $sql .= $table;
+        $sql .= $table . " f ";
         $sql .= $this->form_list_where_sql(
             $db,
             $id_form,
@@ -127,13 +137,81 @@ class FormRepository extends RepositoryBase
             (@$form_no ?? "") === "" &&
             (@$form_serv_name ?? "") === ""
         ) {
-            $sql .= " ORDER BY form_no ASC";
+            $sql .= " ORDER BY f.form_no ASC";
             if ($limit !== null && (int) $limit > 0) {
                 $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
             }
         }
         $query = $this->db_query($sql);
         return $query;
+    }
+
+    /**
+     * List + total untuk VIEW — satu builder WHERE (count dan list selalu selaras).
+     *
+     * @return array{total: int, rows: list<object>}
+     */
+    public function form_list_view(
+        $id_form,
+        $form_no,
+        $form_serv_name,
+        $limit,
+        $offset,
+        $search = null,
+        $search_field = "all",
+    ): array {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_form;
+        $where = $this->form_list_where_sql(
+            $db,
+            $id_form,
+            $form_no,
+            $form_serv_name,
+            $search,
+            $search_field,
+        );
+
+        $countSql = "SELECT COUNT(*) AS cnt FROM $table f " . $where;
+        $countResult = $this->db_query($countSql);
+        $total = 0;
+        if ($countResult instanceof mysqli_result) {
+            $row = $countResult->fetch_object();
+            if ($row !== null && isset($row->cnt)) {
+                $total = (int) $row->cnt;
+            }
+            $countResult->free();
+        }
+
+        $search_trim = trim((string) ($search ?? ""));
+        $rows = [];
+        if ($total > 0 || $search_trim === "") {
+            $listSql = $this->sql_select . $table . " f " . $where;
+            if (
+                (@$id_form ?? "") === "" &&
+                (@$form_no ?? "") === "" &&
+                (@$form_serv_name ?? "") === ""
+            ) {
+                $listSql .= " ORDER BY f.form_no ASC";
+                if ($limit !== null && (int) $limit > 0) {
+                    $listSql .=
+                        " LIMIT " .
+                        (int) $limit .
+                        " OFFSET " .
+                        (int) $offset;
+                }
+            }
+            $listResult = $this->db_query($listSql);
+            if ($listResult instanceof mysqli_result) {
+                while ($row = $listResult->fetch_object()) {
+                    if ($row !== null) {
+                        $rows[] = $row;
+                    }
+                }
+                $listResult->free();
+            }
+        }
+
+        return ["total" => $total, "rows" => $rows];
     }
 
     /**
@@ -150,43 +228,15 @@ class FormRepository extends RepositoryBase
         $search = null,
         $search_field = "all",
     ): array {
-        $result = $this->data_form(
+        return $this->form_list_view(
             $id_form,
             $form_no,
             $form_serv_name,
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
             $limit,
             $offset,
             $search,
             $search_field,
-        );
-
-        if (!($result instanceof mysqli_result)) {
-            return [];
-        }
-
-        $rows = [];
-        while ($row = $result->fetch_object()) {
-            if ($row !== null) {
-                $rows[] = $row;
-            }
-        }
-        $result->free();
-
-        return $rows;
+        )["rows"];
     }
 
     /**
@@ -202,7 +252,7 @@ class FormRepository extends RepositoryBase
     ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_form;
-        $sql = "SELECT COUNT(*) AS cnt FROM $table ";
+        $sql = "SELECT COUNT(*) AS cnt FROM $table f ";
         $sql .= $this->form_list_where_sql(
             $db,
             $id_form,

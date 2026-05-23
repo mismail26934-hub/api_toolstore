@@ -91,17 +91,7 @@ if ($param === FORM_PARAM_ADD || $param === FORM_PARAM_EDIT) {
         $form_serv_name_cek = $row_form_cek->form_serv_name;
     }
 } elseif ($param === FORM_PARAM_VIEW) {
-    $total_forms = api_crud_count_from_query(
-        $data->count_form(
-            $filter_id_form,
-            $filter_form_no,
-            $filter_serv_name,
-            $search_form,
-            $search_field_form,
-        ),
-    );
-
-    $form_rows = $data->fetch_form_list_rows(
+    $form_view = $data->form_list_view(
         $filter_id_form,
         $filter_form_no,
         $filter_serv_name,
@@ -110,9 +100,15 @@ if ($param === FORM_PARAM_ADD || $param === FORM_PARAM_EDIT) {
         $search_form,
         $search_field_form,
     );
+    $total_forms = (int) ($form_view["total"] ?? 0);
+    $form_rows = $form_view["rows"] ?? [];
 
     foreach ($form_rows as $row_form) {
         $result[] = cont_form_format_row($data, $row_form);
+    }
+
+    if ($search_form !== "" && $total_forms === 0) {
+        $result = [];
     }
 }
 
@@ -240,9 +236,12 @@ function cont_form_format_row(Proses_sql $data, ?object $row_form): array
         "",
         "",
     );
-    $row_user = $data_user->fetch_object();
-    if ($row_user !== null) {
-        $superior_id = $row_user->superior_id;
+    if ($data_user instanceof mysqli_result) {
+        $row_user = $data_user->fetch_object();
+        if ($row_user !== null) {
+            $superior_id = $row_user->superior_id;
+        }
+        $data_user->free();
     }
 
     return [

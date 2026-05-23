@@ -90,6 +90,15 @@ Untuk VIEW: `api_mysqli_fetch_all_objects()` mengambil semua baris dulu sebelum 
 npx prettier --write "**/*.php"
 ```
 
+## Pencarian form (`VIEW DATA FORM`)
+
+| POST | Keterangan |
+|------|------------|
+| `search` | Kata kunci (atau `keyword`) — **centang/enabled** di Postman |
+| `search_field` | Opsional: `all` (default), `form_no`, `serviceman`, `pngroup`, `pndesc`, `order`, `extended` |
+
+Setelah deploy, restart Apache/PHP (clear OPcache) agar file `form_repository.php` / `cont_form.php` / `m_proses.php` terbaru terbaca.
+
 ## Regenerasi facade (opsional)
 
 Setelah mengubah signature di repository:
