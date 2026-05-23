@@ -84,8 +84,7 @@ class Proses_sql extends DbTable
             $sql .= " WHERE u.id_users = '$id_users' ";
         } elseif ($search_trim !== "") {
             $escaped = $db->real_escape_string($search_trim);
-            $sql .=
-                " WHERE (u.username LIKE '%$escaped%' OR u.nama_user LIKE '%$escaped%' OR u.no_telp LIKE '%$escaped%' OR u.level LIKE '%$escaped%' OR IFNULL(u.status,'') LIKE '%$escaped%' OR CAST(u.id_users AS CHAR) LIKE '%$escaped%' OR IFNULL(s.nama_superior,'') LIKE '%$escaped%') ";
+            $sql .= " WHERE (u.username LIKE '%$escaped%' OR u.nama_user LIKE '%$escaped%' OR u.no_telp LIKE '%$escaped%' OR u.level LIKE '%$escaped%' OR IFNULL(u.status,'') LIKE '%$escaped%' OR CAST(u.id_users AS CHAR) LIKE '%$escaped%' OR IFNULL(s.nama_superior,'') LIKE '%$escaped%') ";
             $sql .= " ORDER BY u.nama_user ASC";
             if ($limit !== null && (int) $limit > 0) {
                 $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
@@ -128,8 +127,7 @@ class Proses_sql extends DbTable
             $sql .= " WHERE u.id_users = '$id_users' ";
         } elseif ($search_trim !== "") {
             $escaped = $db->real_escape_string($search_trim);
-            $sql .=
-                " WHERE (u.username LIKE '%$escaped%' OR u.nama_user LIKE '%$escaped%' OR u.no_telp LIKE '%$escaped%' OR u.level LIKE '%$escaped%' OR IFNULL(u.status,'') LIKE '%$escaped%' OR CAST(u.id_users AS CHAR) LIKE '%$escaped%' OR IFNULL(s.nama_superior,'') LIKE '%$escaped%') ";
+            $sql .= " WHERE (u.username LIKE '%$escaped%' OR u.nama_user LIKE '%$escaped%' OR u.no_telp LIKE '%$escaped%' OR u.level LIKE '%$escaped%' OR IFNULL(u.status,'') LIKE '%$escaped%' OR CAST(u.id_users AS CHAR) LIKE '%$escaped%' OR IFNULL(s.nama_superior,'') LIKE '%$escaped%') ";
         } elseif ((@$nama_user ?? "") !== "") {
             $sql .= " WHERE u.nama_user = '$nama_user' ";
         } elseif ((@$username ?? "") !== "") {
@@ -265,7 +263,9 @@ class Proses_sql extends DbTable
         $username = $db->real_escape_string((string) $username);
         $sql = "SELECT id_users FROM $table WHERE username = '$username'";
         if ((string) $exclude_id_users !== "") {
-            $exclude_id_users = $db->real_escape_string((string) $exclude_id_users);
+            $exclude_id_users = $db->real_escape_string(
+                (string) $exclude_id_users,
+            );
             $sql .= " AND id_users != '$exclude_id_users'";
         }
         $sql .= " LIMIT 1";
@@ -334,17 +334,20 @@ class Proses_sql extends DbTable
                 return " WHERE CAST(id_form AS CHAR) LIKE $like ";
             case "pngroup":
             case "pn_group":
-                return " WHERE " . $detail_match("fd.pn_group LIKE $like") . " ";
+                return " WHERE " .
+                    $detail_match("fd.pn_group LIKE $like") .
+                    " ";
             case "pndesc":
             case "pn_desc":
                 return " WHERE " . $detail_match("fd.pn_desc LIKE $like") . " ";
             case "all":
             default:
-                return
-                    " WHERE (form_no LIKE $like OR form_serv_name LIKE $like OR form_serv_comment LIKE $like " .
+                return " WHERE (form_no LIKE $like OR form_serv_name LIKE $like OR form_serv_comment LIKE $like " .
                     "OR CAST(id_form AS CHAR) LIKE $like OR IFNULL(form_check_by,'') LIKE $like " .
                     "OR IFNULL(form_milestone,'') LIKE $like OR " .
-                    $detail_match("fd.pn_group LIKE $like OR fd.pn_desc LIKE $like") .
+                    $detail_match(
+                        "fd.pn_group LIKE $like OR fd.pn_desc LIKE $like",
+                    ) .
                     " OR $order_match) ";
         }
     }
@@ -387,9 +390,11 @@ class Proses_sql extends DbTable
             $search,
             $search_field,
         );
-        if ((@$id_form ?? "") === "" &&
+        if (
+            (@$id_form ?? "") === "" &&
             (@$form_no ?? "") === "" &&
-            (@$form_serv_name ?? "") === "") {
+            (@$form_serv_name ?? "") === ""
+        ) {
             $sql .= " ORDER BY form_no ASC";
             if ($limit !== null && (int) $limit > 0) {
                 $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
@@ -433,8 +438,7 @@ class Proses_sql extends DbTable
     {
         $db = $this->mysqli->conn;
         $table = $this->tb_form;
-        $norm =
-            "UPPER(TRIM(REPLACE(IFNULL(form_milestone,''), '.', '')))";
+        $norm = "UPPER(TRIM(REPLACE(IFNULL(form_milestone,''), '.', '')))";
         $mile = "UPPER(TRIM(IFNULL(form_milestone,'')))";
         $sql =
             "SELECT " .
@@ -1146,8 +1150,10 @@ class Proses_sql extends DbTable
         return $query->num_rows > 0;
     }
 
-    public function nama_superior_exists($nama_superior, $exclude_superior_id = "")
-    {
+    public function nama_superior_exists(
+        $nama_superior,
+        $exclude_superior_id = "",
+    ) {
         $db = $this->mysqli->conn;
         $table = $this->tb_superior;
         $nama_superior = $db->real_escape_string((string) $nama_superior);

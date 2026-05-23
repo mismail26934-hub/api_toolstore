@@ -18,8 +18,17 @@ class Dbs
             $this->db,
         );
 
-        if ($this->conn->connect_error) {
-            die($this->conn->connect_error);
+        if ($this->conn->connect_errno) {
+            error_log(
+                "MySQL connect failed [" .
+                    $this->conn->connect_errno .
+                    "]: " .
+                    $this->conn->connect_error,
+            );
+            if (!headers_sent()) {
+                http_response_code(500);
+            }
+            die("Database connection failed.");
         }
     }
 }
