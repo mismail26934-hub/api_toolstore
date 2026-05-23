@@ -3,7 +3,7 @@
 require_once __DIR__ . "/env_loader.php";
 
 /**
- * Validasi token API (id_users + token dari tb_users).
+ * Validasi token API (auth_id_users atau id_users + token dari tb_users).
  * Panggil setelah Proses_sql dibuat.
  */
 function api_guard($data): void
@@ -13,8 +13,9 @@ function api_guard($data): void
     }
 
     $required = api_auth_is_required();
+    // Prefer auth_id_users (session actor); id_users is often the CRUD row target.
     $idUsers = trim(
-        (string) ($_POST["id_users"] ?? ($_POST["auth_id_users"] ?? "")),
+        (string) ($_POST["auth_id_users"] ?? ($_POST["id_users"] ?? "")),
     );
     $token = trim((string) ($_POST["token"] ?? ($_POST["auth_token"] ?? "")));
 

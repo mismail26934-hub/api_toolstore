@@ -1,3 +1,10 @@
 <Files ".env">
     Require all denied
 </Files>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # API v1 → front controller (DocumentRoot = api_toolstore)
+    RewriteRule ^v1(/.*)?$ public/index.php [L,QSA]
+</IfModule>
