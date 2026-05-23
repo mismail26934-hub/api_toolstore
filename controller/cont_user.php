@@ -1,12 +1,15 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     require_once "../conn/conn.php";
+    require_once "../conn/password.php";
+    require_once "../conn/api_auth.php";
     require_once "../model/dbs.php";
 
     $connection = new Dbs($host, $user, $pass, $db);
     include "../model/m_proses.php";
     $result = [];
     $data = new Proses_sql($connection);
+    api_guard($data);
 
     @$param = $_POST["param"];
     @$page = isset($_POST["page"]) ? (int) $_POST["page"] : 1;
@@ -68,8 +71,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             @$password_cek = $row_user_cek->password;
             if (@$password_post == @$password_cek) {
                 @$password = @$password_post;
+            } elseif (@$password_post !== "") {
+                @$password = password_normalize_for_storage(@$password_post);
             } else {
-                @$password = md5(@$password_post);
+                @$password = "";
             }
         } elseif (@$param == @$view_data_user) {
             @$count_q = $data->count_user(

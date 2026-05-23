@@ -1,7 +1,11 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     require_once "../conn/conn.php";
+    require_once "../conn/password.php";
+    require_once "../conn/rate_limit.php";
     require_once "../model/dbs.php";
+
+    login_rate_limit_check();
 
     $connection = new Dbs($host, $user, $pass, $db);
     include "../model/m_proses.php";
@@ -10,19 +14,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     @$param = $_POST["param"] ?? "";
     $username = $_POST["username"] ?? "";
     $passwordRaw = $_POST["password"] ?? "";
-    $password = md5($passwordRaw);
 
     if ($username === "" || $passwordRaw === "") {
         $response["value"] = "0";
         $response["message"] = "LOGIN FAILED ";
     } else {
-        $user = $data->login($username, $password);
+        $userResult = $data->find_user_by_username($username);
         $data_user =
-            $user && $user->num_rows > 0 ? $user->fetch_object() : null;
-        if ($data_user) {
+            $userResult && $userResult->num_rows > 0
+                ? $userResult->fetch_object()
+                : null;
+
+        if (
+            $data_user &&
+            password_verify_login($passwordRaw, (string) $data_user->password)
+        ) {
+            if (password_is_legacy_md5((string) $data_user->password)) {
+                $data->update_user_password(
+                    (string) $data_user->id_users,
+                    password_hash_for_storage($passwordRaw),
+                );
+            }
+
             $id_users = $data_user->id_users;
             $username = $data_user->username;
-            $password = $data_user->password;
             $nama_user = $data_user->nama_user;
             $foto = $data_user->foto;
             $id_tu = $data_user->id_tu;
@@ -33,7 +48,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
             $superior_id = $data_user->superior_id;
             $nama_superior = $data_user->nama_superior ?? "";
 
-            // Cek apakah nama_user terdaftar sebagai nama_superior di tb_superior.
             $superior_from_nama = $data->data_superrior(
                 "",
                 $nama_user,
@@ -48,11 +62,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
                 }
             }
 
+            login_rate_limit_clear();
+
             $response["value"] = "1";
             $response["message"] = "LOGIN SUCCESS";
             $response["id_users"] = strval($id_users);
             $response["username"] = $username;
-            $response["password"] = $password;
             $response["nama_user"] = $nama_user;
             $response["foto"] = $foto;
             $response["id_tu"] = $id_tu;

@@ -5,6 +5,8 @@ if (
     $_POST["param"] === "UPLOAD DATA USER"
 ) {
     require_once "../conn/conn.php";
+    require_once "../conn/password.php";
+    require_once "../conn/api_auth.php";
     require_once "../model/dbs.php";
     require_once "../lib/SpreadsheetReader.php";
 
@@ -59,6 +61,7 @@ if (
     $connection = new Dbs($host, $user, $pass, $db);
     include "../model/m_proses.php";
     $data = new Proses_sql($connection);
+    api_guard($data);
     $db = $connection->conn;
 
     $headers = array_map("normalize_header", $rows[0]);
@@ -134,10 +137,7 @@ if (
             continue;
         }
 
-        $password = $row["password"];
-        if (!preg_match("/^[a-f0-9]{32}$/i", $password)) {
-            $password = md5($password);
-        }
+        $password = password_normalize_for_storage((string) $row["password"]);
 
         $superiorId = $row["superior_id"] !== "" ? $row["superior_id"] : "0";
 

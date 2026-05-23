@@ -2,6 +2,7 @@
 
 require_once __DIR__ . "/crypto.php";
 require_once __DIR__ . "/env_loader.php";
+require_once __DIR__ . "/security_headers.php";
 
 $envPath = dirname(__DIR__) . "/.env";
 load_dotenv($envPath);
@@ -36,11 +37,8 @@ if ($hasEncrypted) {
     if ($pass === false || $pass === "") {
         db_config_fail();
     }
-} elseif (env_value("DB_PASS") !== false) {
+} elseif ($isLocal && env_value("DB_PASS") !== false) {
     $pass = env_value("DB_PASS");
-    if ($pass === "" && !$isLocal) {
-        db_config_fail();
-    }
 } else {
     db_config_fail();
 }

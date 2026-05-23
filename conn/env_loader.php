@@ -60,6 +60,15 @@ function db_config_fail(): void
     die("Database configuration error.");
 }
 
+function sql_fail(mysqli $db): void
+{
+    error_log("MySQL query failed [" . $db->errno . "]: " . $db->error);
+    if (!headers_sent()) {
+        http_response_code(500);
+    }
+    die("Database operation failed.");
+}
+
 /**
  * @return string
  */

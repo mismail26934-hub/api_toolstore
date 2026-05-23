@@ -1,12 +1,14 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] == "POST" && @$_POST["param"] != null) {
     require_once "../conn/conn.php";
+    require_once "../conn/api_auth.php";
     require_once "../model/dbs.php";
 
     $connection = new Dbs($host, $user, $pass, $db);
     include "../model/m_proses.php";
     $result = [];
     $data = new Proses_sql($connection);
+    api_guard($data);
 
     @$param = trim((string) ($_POST["param"] ?? ""));
     @$id_form_detail =

@@ -5,6 +5,7 @@ if (
     $_POST["param"] === "UPLOAD DATA SUPERRIOR"
 ) {
     require_once "../conn/conn.php";
+    require_once "../conn/api_auth.php";
     require_once "../model/dbs.php";
     require_once "../lib/SpreadsheetReader.php";
 
@@ -59,6 +60,7 @@ if (
     $connection = new Dbs($host, $user, $pass, $db);
     include "../model/m_proses.php";
     $data = new Proses_sql($connection);
+    api_guard($data);
     $db = $connection->conn;
 
     $defaultUserId = trim((string) ($_POST["user_id_input_superior"] ?? ""));
