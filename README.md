@@ -90,6 +90,17 @@ Untuk VIEW: `api_mysqli_fetch_all_objects()` mengambil semua baris dulu sebelum 
 npx prettier --write "**/*.php"
 ```
 
+## Pencarian & pagination superior (`VIEW DATA SUPERRIOR`)
+
+| POST | Keterangan |
+|------|------------|
+| `search` | Kata kunci — filter `nama_superior`, `superior_id`, `status_superior` (LIKE) |
+| `page` | Halaman (default `1`) |
+| `limit` | Baris per halaman (default `20`) |
+| `superior_id` / `nama_superior` | Jika diisi, filter eksak (mengalahkan `search`, tanpa LIMIT) |
+
+Response VIEW: `{ "total": N, "data": [ ... ] }` (sama seperti user/form).
+
 ## Pencarian form (`VIEW DATA FORM`)
 
 | POST | Keterangan |

@@ -7,6 +7,119 @@ require_once __DIR__ . "/repository_base.php";
  */
 class SuperiorRepository extends RepositoryBase
 {
+    /**
+     * WHERE untuk list / count superior (filter eksak atau keyword search).
+     */
+    private function superior_list_where_sql(
+        $db,
+        $superior_id,
+        $nama_superior,
+        $status_superior,
+        $search,
+        string $alias = "s",
+    ): string {
+        $a = $alias;
+        if (trim((string) ($superior_id ?? "")) !== "") {
+            $id_esc = $db->real_escape_string((string) $superior_id);
+            return " WHERE $a.superior_id = '$id_esc' ";
+        }
+        if (trim((string) ($nama_superior ?? "")) !== "") {
+            $name_esc = $db->real_escape_string((string) $nama_superior);
+            return " WHERE $a.nama_superior = '$name_esc' ";
+        }
+
+        $search_trim = trim((string) ($search ?? ""));
+        if ($search_trim === "") {
+            if (trim((string) ($status_superior ?? "")) !== "") {
+                $status_esc = $db->real_escape_string(
+                    (string) $status_superior,
+                );
+                return " WHERE $a.status_superior = '$status_esc' ";
+            }
+            return "";
+        }
+
+        $escaped = $db->real_escape_string($search_trim);
+        $like = "'%$escaped%'";
+        $sql =
+            " WHERE ($a.nama_superior LIKE $like OR CAST($a.superior_id AS CHAR) LIKE $like " .
+            "OR IFNULL($a.status_superior,'') LIKE $like) ";
+        if (trim((string) ($status_superior ?? "")) !== "") {
+            $status_esc = $db->real_escape_string((string) $status_superior);
+            $sql .= " AND $a.status_superior = '$status_esc' ";
+        }
+
+        return $sql;
+    }
+
+    /**
+     * List superior untuk VIEW (satu WHERE; skip list jika search aktif & total 0).
+     *
+     * @return array{total: int, rows: list<object>}
+     */
+    public function superior_list_view(
+        $superior_id,
+        $nama_superior,
+        $status_superior,
+        $search = null,
+        $limit = null,
+        $offset = 0,
+    ): array {
+        $db = $this->mysqli->conn;
+        $table = $this->tb_superior;
+        $where = $this->superior_list_where_sql(
+            $db,
+            $superior_id,
+            $nama_superior,
+            $status_superior,
+            $search,
+        );
+
+        $countSql = "SELECT COUNT(*) AS cnt FROM $table s " . $where;
+        $countResult = $this->db_query($countSql);
+        $total = 0;
+        if ($countResult instanceof mysqli_result) {
+            $row = $countResult->fetch_object();
+            if ($row !== null && isset($row->cnt)) {
+                $total = (int) $row->cnt;
+            }
+            $countResult->free();
+        }
+
+        $search_trim = trim((string) ($search ?? ""));
+        $has_exact_filter =
+            trim((string) ($superior_id ?? "")) !== "" ||
+            trim((string) ($nama_superior ?? "")) !== "";
+        $rows = [];
+        if ($total > 0 || $search_trim === "") {
+            $listSql =
+                $this->sql_select .
+                $table .
+                " s " .
+                $where .
+                " ORDER BY s.nama_superior ASC";
+            if (
+                !$has_exact_filter &&
+                $limit !== null &&
+                (int) $limit > 0
+            ) {
+                $listSql .=
+                    " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
+            }
+            $listResult = $this->db_query($listSql);
+            if ($listResult instanceof mysqli_result) {
+                while ($row = $listResult->fetch_object()) {
+                    if ($row !== null) {
+                        $rows[] = $row;
+                    }
+                }
+                $listResult->free();
+            }
+        }
+
+        return ["total" => $total, "rows" => $rows];
+    }
+
     public function data_superrior(
         $superior_id,
         $nama_superior,

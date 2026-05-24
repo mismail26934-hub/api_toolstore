@@ -312,6 +312,11 @@ class Proses_sql extends DbTable
 
     // --- SuperiorRepository ---
 
+    public function superior_list_view($superior_id, $nama_superior, $status_superior, $search = null, $limit = null, $offset = 0,)
+    {
+        return $this->superiors()->superior_list_view($superior_id, $nama_superior, $status_superior, $search, $limit, $offset);
+    }
+
     public function data_superrior($superior_id, $nama_superior, $status_superior, $user_id_input_superior, $date_input_superior,)
     {
         return $this->superiors()->data_superrior($superior_id, $nama_superior, $status_superior, $user_id_input_superior, $date_input_superior);

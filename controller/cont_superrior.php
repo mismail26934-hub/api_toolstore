@@ -15,6 +15,10 @@ const SUPERIOR_PARAM_DELETE = "DELETED DATA SUPERRIOR";
 $result = [];
 $data = api_bootstrap_data();
 $param = api_post_param();
+$pagination = api_pagination_from_post(20);
+$limit = $pagination["limit"];
+$offset = $pagination["offset"];
+$search_superior = api_search_from_post();
 
 $superior_id = $_POST["superior_id"] ?? null;
 $nama_superior = $_POST["nama_superior"] ?? null;
@@ -25,35 +29,43 @@ $date_input_superior = $_POST["date_input_superior"] ?? null;
 $row_superrior_cek = null;
 $superior_id_cek = null;
 $nama_superior_cek = null;
+$total_superiors = 0;
 
-if (
-    $param === SUPERIOR_PARAM_ADD ||
-    $param === SUPERIOR_PARAM_EDIT ||
-    $param === SUPERIOR_PARAM_VIEW
-) {
+$filter_superior_id = cont_superior_filter_value($superior_id);
+$filter_nama_superior = cont_superior_filter_value($nama_superior);
+$filter_status_superior = cont_superior_filter_value($status_superior);
+
+if ($param === SUPERIOR_PARAM_ADD || $param === SUPERIOR_PARAM_EDIT) {
     $data_superrior = $data->data_superrior(
-        $param === SUPERIOR_PARAM_ADD || $param === SUPERIOR_PARAM_EDIT
-            ? ""
-            : $superior_id,
-        $nama_superior,
-        $status_superior,
+        "",
+        $filter_nama_superior,
+        $filter_status_superior,
         "",
         "",
     );
-
-    if ($param === SUPERIOR_PARAM_ADD || $param === SUPERIOR_PARAM_EDIT) {
-        $row_superrior_cek = $data_superrior->fetch_object();
-        if ($row_superrior_cek !== null) {
-            $superior_id_cek = $row_superrior_cek->superior_id;
-            $nama_superior_cek = $row_superrior_cek->nama_superior;
-        }
-    } elseif ($param === SUPERIOR_PARAM_VIEW) {
-        foreach (
-            api_mysqli_fetch_all_objects($data_superrior)
-            as $row_superrior
-        ) {
-            $result[] = cont_superior_format_row($row_superrior);
-        }
+    $row_superrior_cek = $data_superrior->fetch_object();
+    if ($row_superrior_cek !== null) {
+        $superior_id_cek = $row_superrior_cek->superior_id;
+        $nama_superior_cek = $row_superrior_cek->nama_superior;
+    }
+    if ($data_superrior instanceof mysqli_result) {
+        $data_superrior->free();
+    }
+} elseif ($param === SUPERIOR_PARAM_VIEW) {
+    $superior_view = $data->superior_list_view(
+        $filter_superior_id,
+        $filter_nama_superior,
+        $filter_status_superior,
+        $search_superior,
+        $limit,
+        $offset,
+    );
+    $total_superiors = (int) ($superior_view["total"] ?? 0);
+    foreach ($superior_view["rows"] ?? [] as $row_superrior) {
+        $result[] = cont_superior_format_row($row_superrior);
+    }
+    if ($search_superior !== "" && $total_superiors === 0) {
+s        $result = [];
     }
 }
 
@@ -79,7 +91,16 @@ api_crud_push_mutation(
     SUPERIOR_PARAM_DELETE,
 );
 
-echo json_encode($result);
+api_crud_emit($param, SUPERIOR_PARAM_VIEW, $result, $total_superiors);
+
+function cont_superior_filter_value($value): string
+{
+    if ($value === null) {
+        return "";
+    }
+
+    return trim((string) $value);
+}
 
 /**
  * @return array<string, mixed>
