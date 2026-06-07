@@ -65,7 +65,7 @@ if ($param === SUPERIOR_PARAM_ADD || $param === SUPERIOR_PARAM_EDIT) {
         $result[] = cont_superior_format_row($row_superrior);
     }
     if ($search_superior !== "" && $total_superiors === 0) {
-s        $result = [];
+        $result = [];
     }
 }
 

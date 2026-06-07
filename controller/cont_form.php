@@ -38,6 +38,7 @@ $form_sadmin_comment = $_POST["form_sadmin_comment"] ?? null;
 $form_shead_aprd = $_POST["form_shead_aprd"] ?? null;
 $form_shead_comment = $_POST["form_shead_comment"] ?? null;
 $from_date_update = $_POST["from_date_update"] ?? null;
+$to_date_update = $_POST["to_date_update"] ?? null;
 $form_user_update = $_POST["form_user_update"] ?? null;
 $form_date_superior_aprd = $_POST["form_date_superior_aprd"] ?? null;
 $form_date_sadmin_comment = $_POST["form_date_sadmin_comment"] ?? null;
@@ -99,6 +100,8 @@ if ($param === FORM_PARAM_ADD || $param === FORM_PARAM_EDIT) {
         $offset,
         $search_form,
         $search_field_form,
+        cont_form_filter_value($from_date_update),
+        cont_form_filter_value($to_date_update),
     );
     $total_forms = (int) ($form_view["total"] ?? 0);
     $form_rows = $form_view["rows"] ?? [];
@@ -367,6 +370,7 @@ function cont_form_handle_mutation(
 
             $delete_form = $data->delete_form(
                 $id_form,
+                "",
                 "",
                 "",
                 "",

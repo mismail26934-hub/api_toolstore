@@ -94,6 +94,66 @@ class FormRepository extends RepositoryBase
         }
     }
 
+    /**
+     * Filter rentang tanggal kolom from_date_update (VIEW list saja).
+     * Format YYYY-MM-DD; kosong = tidak difilter.
+     */
+    private function form_date_filter_sql(
+        $db,
+        $from_date_update,
+        $to_date_update,
+        string $formAlias = "f",
+    ): string {
+        $from = trim((string) ($from_date_update ?? ""));
+        if ($from === "") {
+            return "";
+        }
+
+        $to = trim((string) ($to_date_update ?? ""));
+        if ($to === "") {
+            $to = $from;
+        }
+
+        if (
+            !preg_match("/^\d{4}-\d{2}-\d{2}$/", $from) ||
+            !preg_match("/^\d{4}-\d{2}-\d{2}$/", $to)
+        ) {
+            return "";
+        }
+
+        if ($from > $to) {
+            [$from, $to] = [$to, $from];
+        }
+
+        $from_esc = $db->real_escape_string($from);
+        $to_esc = $db->real_escape_string($to);
+
+        return " AND DATE($formAlias.from_date_update) >= '$from_esc' AND DATE($formAlias.from_date_update) <= '$to_esc' ";
+    }
+
+    private function append_form_date_filter_sql(
+        $db,
+        string $where,
+        $from_date_update,
+        $to_date_update,
+        string $formAlias = "f",
+    ): string {
+        $dateSql = $this->form_date_filter_sql(
+            $db,
+            $from_date_update,
+            $to_date_update,
+            $formAlias,
+        );
+        if ($dateSql === "") {
+            return $where;
+        }
+        if ($where === "") {
+            return " WHERE 1=1" . $dateSql;
+        }
+
+        return $where . $dateSql;
+    }
+
     public function data_form(
         $id_form,
         $form_no,
@@ -159,6 +219,8 @@ class FormRepository extends RepositoryBase
         $offset,
         $search = null,
         $search_field = "all",
+        $from_date_update = null,
+        $to_date_update = null,
     ): array {
         $db = $this->mysqli->conn;
         $table = $this->tb_form;
@@ -169,6 +231,12 @@ class FormRepository extends RepositoryBase
             $form_serv_name,
             $search,
             $search_field,
+        );
+        $where = $this->append_form_date_filter_sql(
+            $db,
+            $where,
+            $from_date_update,
+            $to_date_update,
         );
 
         $countSql = "SELECT COUNT(*) AS cnt FROM $table f " . $where;
@@ -227,6 +295,8 @@ class FormRepository extends RepositoryBase
         $offset,
         $search = null,
         $search_field = "all",
+        $from_date_update = null,
+        $to_date_update = null,
     ): array {
         return $this->form_list_view(
             $id_form,
@@ -236,6 +306,8 @@ class FormRepository extends RepositoryBase
             $offset,
             $search,
             $search_field,
+            $from_date_update,
+            $to_date_update,
         )["rows"];
     }
 

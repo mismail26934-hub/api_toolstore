@@ -80,5 +80,5 @@ function api_json_not_found(string $message = "Not Found"): void
         ],
         JSON_UNESCAPED_UNICODE,
     );
-    exit;
+    exit();
 }
