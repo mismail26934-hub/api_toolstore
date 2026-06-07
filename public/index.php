@@ -51,6 +51,7 @@ function api_route_handlers(): array
 
         "form" => "cont_form.php",
         "form/detail" => "cont_form_detail.php",
+        "form/detail/export" => "cont_form_detail_export.php",
         "form/action-note" => "cont_action_note.php",
 
         "user" => "cont_user.php",

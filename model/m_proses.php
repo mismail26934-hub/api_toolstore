@@ -680,6 +680,18 @@ class Proses_sql extends DbTable
         );
     }
 
+    public function export_form_detail_full(
+        ?string $id_form = null,
+        ?string $from_date_update = null,
+        ?string $to_date_update = null,
+    ) {
+        return $this->formDetails()->export_form_detail_full(
+            $id_form,
+            $from_date_update,
+            $to_date_update,
+        );
+    }
+
     // --- ActionNoteRepository ---
 
     public function data_action_note(
