@@ -2,6 +2,7 @@
 
 require_once __DIR__ . "/../conn/api_bootstrap.php";
 require_once __DIR__ . "/../conn/api_crud.php";
+require_once __DIR__ . "/../lib/FormMilestoneNotifier.php";
 
 if (!api_is_post_with_param()) {
     return;
@@ -328,6 +329,10 @@ function cont_form_handle_mutation(
                 $form_user_update,
             );
 
+            if ($add_form) {
+                cont_form_dispatch_milestone_notify($data, "", $id_form, $form_no, $form_serv_name, $form_milestone, $form_superior_comment, $form_sadmin_comment, $form_shead_comment);
+            }
+
             return api_crud_ok($param, (bool) $add_form, " FAILED");
 
         case FORM_PARAM_EDIT:
@@ -338,6 +343,8 @@ function cont_form_handle_mutation(
             if ($id_form === null || $id_form === "") {
                 return api_crud_fail("ERROR $param !!");
             }
+
+            $old_milestone = cont_form_fetch_milestone_by_id($data, $id_form);
 
             $edit_form = $data->edit_form(
                 $id_form,
@@ -360,6 +367,10 @@ function cont_form_handle_mutation(
                 $from_date_update,
                 $form_user_update,
             );
+
+            if ($edit_form) {
+                cont_form_dispatch_milestone_notify($data, $old_milestone, $id_form, $form_no, $form_serv_name, $form_milestone, $form_superior_comment, $form_sadmin_comment, $form_shead_comment);
+            }
 
             return api_crud_ok($param, (bool) $edit_form);
 
@@ -395,4 +406,71 @@ function cont_form_handle_mutation(
         default:
             return api_crud_unknown_param($param);
     }
+}
+
+function cont_form_fetch_milestone_by_id(Proses_sql $data, $id_form): string
+{
+    if ($id_form === null || $id_form === "") {
+        return "";
+    }
+
+    $query = $data->data_form(
+        $id_form,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null,
+        0,
+        null,
+        "all",
+    );
+    if (!$query instanceof mysqli_result) {
+        return "";
+    }
+
+    $row = $query->fetch_object();
+    $query->free();
+
+    return $row !== null ? (string) ($row->form_milestone ?? "") : "";
+}
+
+function cont_form_dispatch_milestone_notify(
+    Proses_sql $data,
+    string $old_milestone,
+    $id_form,
+    $form_no,
+    $form_serv_name,
+    $form_milestone,
+    $form_superior_comment,
+    $form_sadmin_comment,
+    $form_shead_comment,
+): void {
+    $notifier = new FormMilestoneNotifier($data);
+    $notifier->notifyIfChanged(
+        [
+            "id_form" => $id_form,
+            "form_no" => $form_no,
+            "form_serv_name" => $form_serv_name,
+            "form_milestone" => $form_milestone,
+            "form_superior_comment" => $form_superior_comment,
+            "form_sadmin_comment" => $form_sadmin_comment,
+            "form_shead_comment" => $form_shead_comment,
+        ],
+        $old_milestone,
+    );
 }

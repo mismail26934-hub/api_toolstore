@@ -196,6 +196,32 @@ class Proses_sql extends DbTable
         );
     }
 
+    public function notify_context_by_nama_user(string $nama_user): ?object
+    {
+        return $this->users()->notify_context_by_nama_user($nama_user);
+    }
+
+    public function notify_context_by_username(string $username): ?object
+    {
+        return $this->users()->notify_context_by_username($username);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function notify_phones_by_level(string $level): array
+    {
+        return $this->users()->notify_phones_by_level($level);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function notify_names_by_level(string $level): array
+    {
+        return $this->users()->notify_names_by_level($level);
+    }
+
     public function add_user(
         $id_users,
         $username,
@@ -824,6 +850,14 @@ class Proses_sql extends DbTable
         );
     }
 
+    /**
+     * @return array<string, list<string>>
+     */
+    public function po_nos_by_form(string $id_form): array
+    {
+        return $this->pos()->po_nos_by_form($id_form);
+    }
+
     // --- SoRepository ---
 
     public function data_so(
@@ -904,6 +938,14 @@ class Proses_sql extends DbTable
             $date_update_so,
             $id_update_so,
         );
+    }
+
+    /**
+     * @return array<string, list<array{so: string, eta: string, note_so: string}>>
+     */
+    public function so_entries_by_form(string $id_form): array
+    {
+        return $this->sos()->so_entries_by_form($id_form);
     }
 
     // --- SuperiorRepository ---
@@ -1076,6 +1118,22 @@ class Proses_sql extends DbTable
         );
     }
 
+    /**
+     * @return list<string>
+     */
+    public function rcv_wh_form_detail_ids_by_form(string $id_form): array
+    {
+        return $this->rcvWhs()->form_detail_ids_by_form($id_form);
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public function rcv_wh_dates_by_form(string $id_form): array
+    {
+        return $this->rcvWhs()->rcv_wh_dates_by_form($id_form);
+    }
+
     // --- RcvToolRepository ---
 
     public function data_rcv_tool(
@@ -1140,6 +1198,22 @@ class Proses_sql extends DbTable
             $rcv_tool_id_input,
             $rcv_tool_date_input,
         );
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function rcv_tool_form_detail_ids_by_form(string $id_form): array
+    {
+        return $this->rcvTools()->form_detail_ids_by_form($id_form);
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public function rcv_tool_dates_by_form(string $id_form): array
+    {
+        return $this->rcvTools()->rcv_tool_dates_by_form($id_form);
     }
 
     function __destruct()

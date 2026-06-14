@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . "/repository_base.php";
+require_once __DIR__ . "/../lib/PhoneNumber.php";
 
 /**
  * Akses data tb_users (login, auth token, CRUD, upload).
@@ -368,5 +369,157 @@ class UserRepository extends RepositoryBase
         }
         $result = $query->get_result();
         return $result && $result->num_rows > 0;
+    }
+
+    /**
+     * Konteks notifikasi serviceman (no_telp + no_telp superior).
+     */
+    public function notify_context_by_nama_user(string $nama_user): ?object
+    {
+        $nama_trim = trim($nama_user);
+        if ($nama_trim === "") {
+            return null;
+        }
+
+        $result = $this->data_user(
+            "",
+            "",
+            "",
+            $nama_trim,
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+        );
+        if (!$result instanceof mysqli_result) {
+            return null;
+        }
+
+        $row = $result->fetch_object();
+        $result->free();
+
+        if ($row !== null) {
+            return $row;
+        }
+
+        return $this->notify_context_by_username($nama_trim);
+    }
+
+    /**
+     * Fallback lookup serviceman by username jika nama_user tidak cocok.
+     */
+    public function notify_context_by_username(string $username): ?object
+    {
+        $username_trim = trim($username);
+        if ($username_trim === "") {
+            return null;
+        }
+
+        $result = $this->data_user(
+            "",
+            $username_trim,
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+        );
+        if (!$result instanceof mysqli_result) {
+            return null;
+        }
+
+        $row = $result->fetch_object();
+        $result->free();
+
+        return $row ?: null;
+    }
+
+    /**
+     * Nomor telepon unik untuk semua user pada level tertentu.
+     *
+     * @return list<string>
+     */
+    public function notify_phones_by_level(string $level): array
+    {
+        $level_trim = trim($level);
+        if ($level_trim === "") {
+            return [];
+        }
+
+        $result = $this->data_user(
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            $level_trim,
+            "",
+            "",
+        );
+        if (!$result instanceof mysqli_result) {
+            return [];
+        }
+
+        $phones = [];
+        while ($row = $result->fetch_object()) {
+            $phone = PhoneNumber::normalize($row->no_telp ?? null);
+            if ($phone !== null) {
+                $phones[] = $phone;
+            }
+        }
+        $result->free();
+
+        return array_values(array_unique($phones));
+    }
+
+    /**
+     * Nama tampilan unik untuk semua user pada level tertentu.
+     *
+     * @return list<string>
+     */
+    public function notify_names_by_level(string $level): array
+    {
+        $level_trim = trim($level);
+        if ($level_trim === "") {
+            return [];
+        }
+
+        $result = $this->data_user(
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            $level_trim,
+            "",
+            "",
+        );
+        if (!($result instanceof mysqli_result)) {
+            return [];
+        }
+
+        $names = [];
+        while ($row = $result->fetch_object()) {
+            $name = trim((string) ($row->nama_user ?? ""));
+            if ($name !== "") {
+                $names[] = $name;
+            }
+        }
+        $result->free();
+
+        return array_values(array_unique($names));
     }
 }
