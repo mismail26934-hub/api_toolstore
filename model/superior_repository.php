@@ -181,6 +181,7 @@ class SuperiorRepository extends RepositoryBase
             ],
             "superior_id",
             $superior_id,
+            $this->actionByValue($user_id_input_superior),
         );
     }
 
@@ -195,6 +196,7 @@ class SuperiorRepository extends RepositoryBase
             $this->tb_superior,
             "superior_id",
             $superior_id,
+            $this->actionByValue($user_id_input_superior),
         );
     }
 

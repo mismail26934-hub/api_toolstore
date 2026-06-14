@@ -264,7 +264,9 @@ class UserRepository extends RepositoryBase
         $level,
         $status,
         $superior_id,
+        ?string $actionBy = null,
     ) {
+        $this->setActionUser($actionBy);
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
         $sql = "UPDATE $table SET username = ?, password = ?, nama_user = ?, foto = ?, id_tu = ?, no_telp = ?, token = ?, level = ?, status = ?, superior_id = ? WHERE id_users = ?";
@@ -304,7 +306,9 @@ class UserRepository extends RepositoryBase
         $level,
         $status,
         $superior_id,
+        ?string $actionBy = null,
     ) {
+        $this->setActionUser($actionBy);
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
         $sql = "DELETE FROM $table WHERE id_users = ?";

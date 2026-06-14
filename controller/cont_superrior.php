@@ -189,7 +189,13 @@ function cont_superior_handle_mutation(
 
             return api_crud_ok(
                 $param,
-                (bool) $data->delete_superrior($superior_id, "", "", "", ""),
+                (bool) $data->delete_superrior(
+                    $superior_id,
+                    "",
+                    "",
+                    $user_id_input_superior,
+                    "",
+                ),
             );
 
         default:

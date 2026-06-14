@@ -165,7 +165,13 @@ function cont_rcv_wh_handle_mutation(
 
             return api_crud_ok(
                 $param,
-                (bool) $data->delete_rcv_wh($id_rcv_wh, "", "", "", ""),
+                (bool) $data->delete_rcv_wh(
+                    $id_rcv_wh,
+                    "",
+                    "",
+                    $rcv_wh_id_input,
+                    "",
+                ),
             );
 
         default:

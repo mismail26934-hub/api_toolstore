@@ -107,6 +107,7 @@ class FormDetailRepository extends RepositoryBase
             ],
             "id_form_detail",
             $id_form_detail,
+            $this->actionByValue($form_detail_user),
         );
     }
 
@@ -129,6 +130,7 @@ class FormDetailRepository extends RepositoryBase
             $this->tb_form_detail,
             "id_form_detail",
             $id_form_detail,
+            $this->actionByValue($form_detail_user),
         );
     }
 

@@ -249,6 +249,7 @@ function cont_user_handle_mutation(
                 cont_user_str($level),
                 cont_user_str($status),
                 cont_user_str($superior_id),
+                cont_user_str($id_user_post),
             );
 
             return [
@@ -278,6 +279,7 @@ function cont_user_handle_mutation(
                 cont_user_str($level),
                 cont_user_str($status),
                 cont_user_str($superior_id),
+                cont_user_str($id_user_post),
             );
 
             return [

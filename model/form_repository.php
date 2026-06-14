@@ -466,6 +466,7 @@ class FormRepository extends RepositoryBase
             ],
             "id_form",
             $id_form,
+            $this->actionByValue($form_user_update),
         );
     }
 
@@ -490,6 +491,11 @@ class FormRepository extends RepositoryBase
         $from_date_update,
         $form_user_update,
     ) {
-        return $this->db_delete_where($this->tb_form, "id_form", $id_form);
+        return $this->db_delete_where(
+            $this->tb_form,
+            "id_form",
+            $id_form,
+            $this->actionByValue($form_user_update),
+        );
     }
 }

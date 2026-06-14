@@ -66,6 +66,7 @@ class PoRepository extends RepositoryBase
             ],
             "id_po",
             $id_po,
+            $this->actionByValue($user_update_po),
         );
     }
 
@@ -76,7 +77,12 @@ class PoRepository extends RepositoryBase
         $date_update_po,
         $user_update_po,
     ) {
-        return $this->db_delete_where($this->tb_po, "id_po", $id_po);
+        return $this->db_delete_where(
+            $this->tb_po,
+            "id_po",
+            $id_po,
+            $this->actionByValue($user_update_po),
+        );
     }
 
     /**

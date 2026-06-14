@@ -69,6 +69,7 @@ class RcvToolRepository extends RepositoryBase
             ],
             "id_rcv_tool",
             $id_rcv_tool,
+            $this->actionByValue($rcv_tool_id_input),
         );
     }
 
@@ -83,6 +84,7 @@ class RcvToolRepository extends RepositoryBase
             $this->tb_rcv_tool,
             "id_rcv_tool",
             $id_rcv_tool,
+            $this->actionByValue($rcv_tool_id_input),
         );
     }
 

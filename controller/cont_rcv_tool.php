@@ -168,7 +168,13 @@ function cont_rcv_tool_handle_mutation(
 
             return api_crud_ok(
                 $param,
-                (bool) $data->delete_rcv_tool($id_rcv_tool, "", "", "", ""),
+                (bool) $data->delete_rcv_tool(
+                    $id_rcv_tool,
+                    "",
+                    "",
+                    $rcv_tool_id_input,
+                    "",
+                ),
             );
 
         default:

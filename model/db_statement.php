@@ -49,6 +49,25 @@ trait DbStatementTrait
         return $stmt;
     }
 
+    protected function setActionUser(?string $actionBy): void
+    {
+        $db = $this->db();
+        $user = $actionBy ?? "";
+        $stmt = $db->prepare("SET @app_user = ?");
+        if ($stmt === false) {
+            sql_fail($db);
+        }
+        $stmt->bind_param("s", $user);
+        if (!$stmt->execute()) {
+            sql_fail($db);
+        }
+    }
+
+    protected function actionByValue($value): string
+    {
+        return $value === null ? "" : (string) $value;
+    }
+
     /**
      * @param array<string, string|null> $data
      */
@@ -57,7 +76,9 @@ trait DbStatementTrait
         array $data,
         string $whereCol,
         string $whereVal,
+        ?string $actionBy = null,
     ): mysqli_stmt {
+        $this->setActionUser($actionBy);
         $db = $this->db();
         $sets = [];
         foreach (array_keys($data) as $col) {
@@ -88,7 +109,9 @@ trait DbStatementTrait
         string $table,
         string $whereCol,
         string $whereVal,
+        ?string $actionBy = null,
     ): mysqli_stmt {
+        $this->setActionUser($actionBy);
         $db = $this->db();
         $sql = "DELETE FROM $table WHERE $whereCol = ?";
         $stmt = $db->prepare($sql);

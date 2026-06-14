@@ -69,6 +69,7 @@ class RcvWhRepository extends RepositoryBase
             ],
             "id_rcv_wh",
             $id_rcv_wh,
+            $this->actionByValue($rcv_wh_id_input),
         );
     }
 
@@ -83,6 +84,7 @@ class RcvWhRepository extends RepositoryBase
             $this->tb_rcv_wh,
             "id_rcv_wh",
             $id_rcv_wh,
+            $this->actionByValue($rcv_wh_id_input),
         );
     }
 

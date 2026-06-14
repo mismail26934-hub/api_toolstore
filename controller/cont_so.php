@@ -183,7 +183,7 @@ function cont_so_handle_mutation(
 
             return api_crud_ok(
                 $param,
-                (bool) $data->delete_so($id_so, "", "", "", "", "", ""),
+                (bool) $data->delete_so($id_so, "", "", "", "", "", $id_update_so),
             );
 
         default:

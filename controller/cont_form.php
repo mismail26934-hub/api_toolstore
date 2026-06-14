@@ -398,7 +398,7 @@ function cont_form_handle_mutation(
                 "",
                 "",
                 "",
-                "",
+                $form_user_update,
             );
 
             return api_crud_ok($param, (bool) $delete_form);

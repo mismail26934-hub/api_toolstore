@@ -262,6 +262,7 @@ class Proses_sql extends DbTable
         $level,
         $status,
         $superior_id,
+        ?string $actionBy = null,
     ) {
         return $this->users()->edit_user(
             $id_users,
@@ -275,6 +276,7 @@ class Proses_sql extends DbTable
             $level,
             $status,
             $superior_id,
+            $actionBy,
         );
     }
 
@@ -290,6 +292,7 @@ class Proses_sql extends DbTable
         $level,
         $status,
         $superior_id,
+        ?string $actionBy = null,
     ) {
         return $this->users()->delete_user(
             $id_users,
@@ -303,6 +306,7 @@ class Proses_sql extends DbTable
             $level,
             $status,
             $superior_id,
+            $actionBy,
         );
     }
 

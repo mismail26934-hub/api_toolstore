@@ -76,6 +76,7 @@ class SoRepository extends RepositoryBase
             ],
             "id_so",
             $id_so,
+            $this->actionByValue($id_update_so),
         );
     }
 
@@ -88,7 +89,12 @@ class SoRepository extends RepositoryBase
         $date_update_so,
         $id_update_so,
     ) {
-        return $this->db_delete_where($this->tb_so, "id_so", $id_so);
+        return $this->db_delete_where(
+            $this->tb_so,
+            "id_so",
+            $id_so,
+            $this->actionByValue($id_update_so),
+        );
     }
 
     /**

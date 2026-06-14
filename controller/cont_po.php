@@ -168,7 +168,7 @@ function cont_po_handle_mutation(
 
             return api_crud_ok(
                 $param,
-                (bool) $data->delete_po($id_po, "", "", "", ""),
+                (bool) $data->delete_po($id_po, "", "", "", $user_update_po),
             );
 
         default:
