@@ -59,7 +59,7 @@ class RcvToolRepository extends RepositoryBase
         $rcv_tool_id_input,
         $rcv_tool_date_input,
     ) {
-        return $this->db_update(
+        return $this->db_update_if_changed(
             $this->tb_rcv_tool,
             [
                 "id_form_detail" => $id_form_detail,

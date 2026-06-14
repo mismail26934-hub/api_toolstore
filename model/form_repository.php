@@ -442,7 +442,7 @@ class FormRepository extends RepositoryBase
         $from_date_update,
         $form_user_update,
     ) {
-        return $this->db_update(
+        return $this->db_update_if_changed(
             $this->tb_form,
             [
                 "form_no" => $form_no,

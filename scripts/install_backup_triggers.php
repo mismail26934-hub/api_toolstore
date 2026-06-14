@@ -136,6 +136,26 @@ function buildInsertParts(
     return [$insertCols, $insertVals];
 }
 
+function buildRowChangedCondition(mysqli $db, string $sourceTable): string
+{
+    $checks = [];
+
+    foreach (getColumns($db, $sourceTable) as $col) {
+        if (str_contains($col["extra"], "auto_increment")) {
+            continue;
+        }
+
+        $name = $col["name"];
+        $checks[] = "OLD.`$name` <=> NEW.`$name`";
+    }
+
+    if ($checks === []) {
+        return "TRUE";
+    }
+
+    return "NOT (\n        " . implode("\n        AND ", $checks) . "\n    )";
+}
+
 function buildTriggerSql(
     mysqli $db,
     string $sourceTable,
@@ -154,17 +174,32 @@ function buildTriggerSql(
     $colList = implode(",\n        ", $cols);
     $valList = implode(",\n        ", $vals);
 
+    $insertSql = <<<SQL
+    INSERT INTO `$backupTable` (
+        $colList
+    ) VALUES (
+        $valList
+    );
+SQL;
+
+    if ($timing === "UPDATE") {
+        $changeCondition = buildRowChangedCondition($db, $sourceTable);
+        $body = <<<SQL
+    IF $changeCondition THEN
+$insertSql
+    END IF;
+SQL;
+    } else {
+        $body = $insertSql;
+    }
+
     return <<<SQL
 DROP TRIGGER IF EXISTS `$triggerName`;
 CREATE TRIGGER `$triggerName`
 BEFORE $timing ON `$sourceTable`
 FOR EACH ROW
 BEGIN
-    INSERT INTO `$backupTable` (
-        $colList
-    ) VALUES (
-        $valList
-    );
+$body
 END;
 SQL;
 }

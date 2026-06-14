@@ -266,6 +266,28 @@ class UserRepository extends RepositoryBase
         $superior_id,
         ?string $actionBy = null,
     ) {
+        $newData = [
+            "username" => $username,
+            "password" => $password,
+            "nama_user" => $nama_user,
+            "foto" => $foto,
+            "id_tu" => $id_tu,
+            "no_telp" => $no_telp,
+            "token" => $token,
+            "level" => $level,
+            "status" => $status,
+            "superior_id" => $superior_id,
+        ];
+
+        $current = $this->db_fetch_assoc_where(
+            $this->tb_user,
+            "id_users",
+            (string) $id_users,
+        );
+        if ($current === null || $this->rowDataUnchanged($current, $newData)) {
+            return 0;
+        }
+
         $this->setActionUser($actionBy);
         $db = $this->mysqli->conn;
         $table = $this->tb_user;
@@ -291,7 +313,8 @@ class UserRepository extends RepositoryBase
         if (!$query->execute()) {
             sql_fail($db);
         }
-        return $query;
+
+        return $query->affected_rows;
     }
 
     public function delete_user(

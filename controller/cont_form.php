@@ -346,7 +346,7 @@ function cont_form_handle_mutation(
 
             $old_milestone = cont_form_fetch_milestone_by_id($data, $id_form);
 
-            $edit_form = $data->edit_form(
+            $affected = $data->edit_form(
                 $id_form,
                 $form_no,
                 $form_serv_name,
@@ -368,11 +368,11 @@ function cont_form_handle_mutation(
                 $form_user_update,
             );
 
-            if ($edit_form) {
+            if ($affected > 0) {
                 cont_form_dispatch_milestone_notify($data, $old_milestone, $id_form, $form_no, $form_serv_name, $form_milestone, $form_superior_comment, $form_sadmin_comment, $form_shead_comment);
             }
 
-            return api_crud_ok($param, (bool) $edit_form);
+            return api_crud_edit_ok($param, $affected);
 
         case FORM_PARAM_DELETE:
             if ($id_form === null || $id_form === "") {

@@ -89,7 +89,7 @@ class FormDetailRepository extends RepositoryBase
         $form_detail_date,
         $form_detail_user,
     ) {
-        return $this->db_update(
+        return $this->db_update_if_changed(
             $this->tb_form_detail,
             [
                 "id_form" => $id_form,

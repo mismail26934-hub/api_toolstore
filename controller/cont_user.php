@@ -237,7 +237,7 @@ function cont_user_handle_mutation(
                 ];
             }
 
-            $edit_user = $data->edit_user(
+            $affected = $data->edit_user(
                 cont_user_str($id_users),
                 cont_user_str($username),
                 cont_user_str($password),
@@ -252,12 +252,7 @@ function cont_user_handle_mutation(
                 cont_user_str($id_user_post),
             );
 
-            return [
-                "value" => $edit_user ? "1" : "0",
-                "message" => $edit_user
-                    ? $param . " SUCCESS"
-                    : $param . " FAILED",
-            ];
+            return api_crud_edit_ok($param, $affected);
 
         case USER_PARAM_DELETE:
             if ($id_users === null || $id_users === "") {

@@ -171,7 +171,7 @@ class SuperiorRepository extends RepositoryBase
         $user_id_input_superior,
         $date_input_superior,
     ) {
-        return $this->db_update(
+        return $this->db_update_if_changed(
             $this->tb_superior,
             [
                 "nama_superior" => $nama_superior,

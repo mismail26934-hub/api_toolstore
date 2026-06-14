@@ -171,9 +171,9 @@ function cont_superior_handle_mutation(
                 return api_crud_fail("ERROR $param !");
             }
 
-            return api_crud_ok(
+            return api_crud_edit_ok(
                 $param,
-                (bool) $data->edit_superrior(
+                $data->edit_superrior(
                     $superior_id,
                     $nama_superior,
                     $status_superior,

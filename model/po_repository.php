@@ -56,7 +56,7 @@ class PoRepository extends RepositoryBase
         $date_update_po,
         $user_update_po,
     ) {
-        return $this->db_update(
+        return $this->db_update_if_changed(
             $this->tb_po,
             [
                 "id_form_detail" => $id_form_detail,

@@ -147,9 +147,9 @@ function cont_rcv_wh_handle_mutation(
                 return api_crud_fail("ERROR $param !");
             }
 
-            return api_crud_ok(
+            return api_crud_edit_ok(
                 $param,
-                (bool) $data->edit_rcv_wh(
+                $data->edit_rcv_wh(
                     $id_rcv_wh,
                     $id_form_detail,
                     $rcv_wh_date,

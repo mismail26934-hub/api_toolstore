@@ -60,6 +60,21 @@ function api_crud_count_from_query(
 /**
  * @return array{value: string, message: string}
  */
+function api_crud_edit_ok(string $param, int $affectedRows): array
+{
+    if ($affectedRows <= 0) {
+        return [
+            "value" => "0",
+            "message" => "NO DATA CHANGE",
+        ];
+    }
+
+    return api_crud_ok($param, true);
+}
+
+/**
+ * @return array{value: string, message: string}
+ */
 function api_crud_fail(string $message): array
 {
     return ["value" => "0", "message" => $message];

@@ -68,6 +68,56 @@ trait DbStatementTrait
         return $value === null ? "" : (string) $value;
     }
 
+    protected function rowDataUnchanged(array $current, array $newData): bool
+    {
+        foreach ($newData as $col => $value) {
+            $old = $current[$col] ?? null;
+            if ((string) ($old ?? "") !== (string) ($value ?? "")) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    protected function db_fetch_assoc_where(
+        string $table,
+        string $whereCol,
+        string $whereVal,
+    ): ?array {
+        $result = $this->db_select_where($table, $whereCol, $whereVal);
+        if (!($result instanceof mysqli_result)) {
+            return null;
+        }
+
+        $row = $result->fetch_assoc();
+        $result->free();
+
+        return $row ?: null;
+    }
+
+    /**
+     * @param array<string, string|null> $data
+     */
+    protected function db_update_if_changed(
+        string $table,
+        array $data,
+        string $whereCol,
+        string $whereVal,
+        ?string $actionBy = null,
+    ): int {
+        $current = $this->db_fetch_assoc_where($table, $whereCol, $whereVal);
+        if ($current === null) {
+            return 0;
+        }
+
+        if ($this->rowDataUnchanged($current, $data)) {
+            return 0;
+        }
+
+        return $this->db_update($table, $data, $whereCol, $whereVal, $actionBy);
+    }
+
     /**
      * @param array<string, string|null> $data
      */
@@ -77,7 +127,7 @@ trait DbStatementTrait
         string $whereCol,
         string $whereVal,
         ?string $actionBy = null,
-    ): mysqli_stmt {
+    ): int {
         $this->setActionUser($actionBy);
         $db = $this->db();
         $sets = [];
@@ -102,7 +152,8 @@ trait DbStatementTrait
         if (!$stmt->execute()) {
             sql_fail($db);
         }
-        return $stmt;
+
+        return $stmt->affected_rows;
     }
 
     protected function db_delete_where(

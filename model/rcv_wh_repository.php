@@ -59,7 +59,7 @@ class RcvWhRepository extends RepositoryBase
         $rcv_wh_id_input,
         $rcv_wh_date_input,
     ) {
-        return $this->db_update(
+        return $this->db_update_if_changed(
             $this->tb_rcv_wh,
             [
                 "id_form_detail" => $id_form_detail,

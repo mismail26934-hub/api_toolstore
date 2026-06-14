@@ -276,9 +276,9 @@ function cont_form_detail_handle_mutation(
                 ];
             }
 
-            return api_crud_ok(
+            return api_crud_edit_ok(
                 $param,
-                (bool) $data->edit_form_detail(
+                $data->edit_form_detail(
                     $id_form_detail,
                     $id_form,
                     $form_comment,

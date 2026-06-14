@@ -150,9 +150,9 @@ function cont_po_handle_mutation(
                 return api_crud_fail("ERROR $param !");
             }
 
-            return api_crud_ok(
+            return api_crud_edit_ok(
                 $param,
-                (bool) $data->edit_po(
+                $data->edit_po(
                     $id_po,
                     $id_form_detail,
                     $po_no,

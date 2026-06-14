@@ -150,9 +150,9 @@ function cont_rcv_tool_handle_mutation(
                 return api_crud_fail("ERROR $param !");
             }
 
-            return api_crud_ok(
+            return api_crud_edit_ok(
                 $param,
-                (bool) $data->edit_rcv_tool(
+                $data->edit_rcv_tool(
                     $id_rcv_tool,
                     $id_form_detail,
                     $rcv_tool_date,

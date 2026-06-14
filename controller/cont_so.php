@@ -163,9 +163,9 @@ function cont_so_handle_mutation(
                 return api_crud_fail("ERROR $param !");
             }
 
-            return api_crud_ok(
+            return api_crud_edit_ok(
                 $param,
-                (bool) $data->edit_so(
+                $data->edit_so(
                     $id_so,
                     $id_form_detail,
                     $so,

@@ -64,7 +64,7 @@ class SoRepository extends RepositoryBase
         $date_update_so,
         $id_update_so,
     ) {
-        return $this->db_update(
+        return $this->db_update_if_changed(
             $this->tb_so,
             [
                 "id_form_detail" => $id_form_detail,
